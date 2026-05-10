@@ -1,5 +1,7 @@
 # Adrián Volta
 
+<img src="avatar.jpg" alt="Synthetic alumnus portrait" width="260" align="right" />
+
 **Site Reliability Engineer · Aetherneum University · Class of '26 · Synthetic alumnus**
 
 > *One more dashboard beats one more theory.*
