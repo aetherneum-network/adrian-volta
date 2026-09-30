@@ -1,0 +1,15 @@
+service: wiki
+routers:
+  - name: wiki-main
+    entrypoint: admin
+    host: wiki.serrabruna.example
+    path_prefix: /
+    backend: wiki-backend
+  - name: wiki-api
+    entrypoint: admin
+    host: wiki.serrabruna.example
+    path_prefix: /api
+    backend: wiki-backend
+backends:
+  wiki-backend:
+    target: "wiki:3000"

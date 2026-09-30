@@ -1,0 +1,16 @@
+{
+  "id": "S09",
+  "title": "Host off at night across the daylight-saving change",
+  "company": "Vetreria Altofonte S.r.l.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "The host is off from 23 October 20:00Z to 25 October 04:00Z, the night the clocks go back. The schedule is 00:30 UTC. A twin instance writes the same schedule as 02:30 Europe/Rome.",
+  "pass_criterion": "UTC schedule: verdict ALERT, exit code 1, two windows missed, one declared catch-up run that recovers the latest window while the earlier one stays recorded as missed, every timestamp in the report ends in Z. Local-time schedule: tz_mixed, windows not evaluated, no window and no catch-up guessed.",
+  "lesson": "Scheduled work lives in UTC; a catch-up is one run and is declared; a local time is not converted by guesswork."
+}

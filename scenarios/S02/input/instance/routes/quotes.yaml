@@ -1,0 +1,20 @@
+service: quotes
+routers:
+  - name: quotes-main
+    entrypoint: public
+    host: quotes.serrabruna.example
+    path_prefix: /
+    backend: quotes-backend
+  - name: quotes-api
+    entrypoint: public
+    host: quotes.serrabruna.example
+    path_prefix: /api
+    backend: quotes-backend
+  - name: quotes-docs
+    entrypoint: public
+    host: quotes.serrabruna.example
+    path_prefix: /docs
+    backend: quotes-backend
+backends:
+  quotes-backend:
+    target: "quotes:8443"

@@ -1,0 +1,16 @@
+{
+  "id": "S05",
+  "title": "Backup and restore of a tree with long paths and accented names",
+  "company": "Molino Serrabruna S.r.l.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "Eleven files, two of them with relative paths longer than 260 characters, several with accented names, one empty; two nights of the chain, then a restore drill of the newest snapshot.",
+  "pass_criterion": "Verdict OK, exit code 0; source count = count declared by the snapshot = restored count; every restored file re-hashed here has the SHA-256 of its source; an independent reference finds no differing file in either repository.",
+  "lesson": "A restore is verified against the source manifest, file by file, or it is not verified."
+}

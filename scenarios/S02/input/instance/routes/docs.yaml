@@ -1,0 +1,20 @@
+service: docs
+routers:
+  - name: docs-main
+    entrypoint: public
+    host: docs.serrabruna.example
+    path_prefix: /
+    backend: docs-backend
+  - name: docs-api
+    entrypoint: public
+    host: docs.serrabruna.example
+    path_prefix: /api
+    backend: docs-backend
+  - name: docs-docs
+    entrypoint: public
+    host: docs.serrabruna.example
+    path_prefix: /docs
+    backend: docs-backend
+backends:
+  docs-backend:
+    target: "docs:3000"

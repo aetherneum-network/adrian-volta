@@ -1,0 +1,10 @@
+service: console
+routers:
+  - name: console-main
+    entrypoint: admin
+    host: console.valdora.example
+    path_prefix: /
+    backend: console-backend
+backends:
+  console-backend:
+    target: "console:8443"

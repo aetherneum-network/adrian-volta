@@ -1,0 +1,14 @@
+[
+  {
+    "changes": [
+      {
+        "path": "produzione/Registro lotti.txt",
+        "seed": "S09:lotti:2026-10-23",
+        "size": 3300
+      }
+    ],
+    "export_seed": "S09:export:2026-10-23",
+    "run": "2026-10-23",
+    "start": "2026-10-23T00:30:00Z"
+  }
+]

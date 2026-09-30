@@ -1,0 +1,16 @@
+{
+  "id": "S08",
+  "title": "Backup before export",
+  "company": "Molino Serrabruna S.r.l.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "The policy lists backup_a before export, so every night the snapshot holds the export of the day before. The same nights are replayed with the chain in order.",
+  "pass_criterion": "Inverted: verdict FAILED, exit code 3, one finding on policy/backup.yaml / chain; the drill differs on the export file only and the snapshot's export has yesterday's SHA-256. Chained: verdict OK and the snapshot's export has today's SHA-256.",
+  "lesson": "One chained runner, in order: a backup taken before the export is a backup of yesterday."
+}

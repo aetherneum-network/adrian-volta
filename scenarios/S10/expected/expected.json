@@ -1,0 +1,58 @@
+{
+  "after_drill": {
+    "decision": "supersede",
+    "exit_code": 0,
+    "facts": {
+      "keep_last_valid": true,
+      "kept_verified": 1,
+      "to_supersede": 2
+    },
+    "manifests": {
+      "snapshots": [
+        "20260912T023110Z.json"
+      ],
+      "superseded": [
+        "20260910T023110Z.json",
+        "20260911T023110Z.json"
+      ]
+    },
+    "moved": [
+      "20260910T023110Z",
+      "20260911T023110Z"
+    ],
+    "rule": "RT-020",
+    "verdict": "OK"
+  },
+  "blocked": {
+    "decision": "block",
+    "exit_code": 2,
+    "facts": {
+      "keep_last_valid": true,
+      "kept_verified": 0,
+      "to_supersede": 2
+    },
+    "findings": [
+      {
+        "also": [],
+        "class": "retention_deletes_only_valid",
+        "file": "policy/backup.yaml",
+        "item": "retention",
+        "rule": "RT-010",
+        "verdict": "BLOCKED"
+      }
+    ],
+    "keep": [
+      "20260912T023110Z"
+    ],
+    "rule": "RT-010",
+    "supersede": [
+      "20260910T023110Z",
+      "20260911T023110Z"
+    ],
+    "verdict": "BLOCKED",
+    "verified": [
+      "20260910T023110Z"
+    ]
+  },
+  "scenario": "S10"
+}

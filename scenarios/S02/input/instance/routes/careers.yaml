@@ -1,0 +1,20 @@
+service: careers
+routers:
+  - name: careers-main
+    entrypoint: public
+    host: careers.serrabruna.example
+    path_prefix: /
+    backend: careers-backend
+  - name: careers-api
+    entrypoint: public
+    host: careers.serrabruna.example
+    path_prefix: /api
+    backend: careers-backend
+  - name: careers-docs
+    entrypoint: public
+    host: careers.serrabruna.example
+    path_prefix: /docs
+    backend: careers-backend
+backends:
+  careers-backend:
+    target: "careers:9000"

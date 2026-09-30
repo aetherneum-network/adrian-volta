@@ -1,0 +1,22 @@
+{
+  "declared_at": "2026-09-14T06:43:00Z",
+  "exit_code": 3,
+  "failing_beats": 19,
+  "findings": [
+    {
+      "also": [],
+      "class": "health_probes_process",
+      "file": "topology.yaml",
+      "item": "status",
+      "rule": "H-020",
+      "verdict": "FAILED"
+    }
+  ],
+  "first_failing_beat": "2026-09-14T06:42:00Z",
+  "postmortem_sha256": "240bba9a53f920c48308d1c625d380f719eaeb1d2871379d488211ec946ab6f5",
+  "scenario": "S04",
+  "statuses": [
+    404
+  ],
+  "verdict": "FAILED"
+}

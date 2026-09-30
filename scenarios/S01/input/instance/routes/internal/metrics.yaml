@@ -1,0 +1,10 @@
+service: metrics
+routers:
+  - name: metrics-main
+    entrypoint: admin
+    host: metrics.valdora.example
+    path_prefix: /
+    backend: metrics-backend
+backends:
+  metrics-backend:
+    target: "metrics:9090"

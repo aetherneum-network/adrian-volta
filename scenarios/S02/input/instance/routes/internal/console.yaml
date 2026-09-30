@@ -1,0 +1,15 @@
+service: console
+routers:
+  - name: console-main
+    entrypoint: admin
+    host: console.serrabruna.example
+    path_prefix: /
+    backend: console-backend
+  - name: console-api
+    entrypoint: admin
+    host: console.serrabruna.example
+    path_prefix: /api
+    backend: console-backend
+backends:
+  console-backend:
+    target: "console:8443"

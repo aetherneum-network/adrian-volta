@@ -1,0 +1,14 @@
+{
+  "declared_count": 11,
+  "exit_code": 0,
+  "findings": [],
+  "longest_relative_path": 448,
+  "non_ascii_paths": 8,
+  "restored_count": 11,
+  "scenario": "S05",
+  "snapshot": "20260912T023110Z",
+  "source_bytes": 18550,
+  "source_count": 11,
+  "source_manifest_sha256": "5659ac169a75269d5a0e3c6eb479c2e246ed8e75a70dd085678be42b447f56a3",
+  "verdict": "OK"
+}

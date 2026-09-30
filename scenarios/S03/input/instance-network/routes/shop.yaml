@@ -1,0 +1,10 @@
+service: shop
+routers:
+  - name: shop-main
+    entrypoint: public
+    host: shop.altofonte.example
+    path_prefix: /
+    backend: shop-backend
+backends:
+  shop-backend:
+    target: "shop:8080"

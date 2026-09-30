@@ -1,0 +1,47 @@
+[
+  {
+    "path": "documenti/Relazione qualità.txt",
+    "seed": "S07:1",
+    "size": 2300
+  },
+  {
+    "path": "documenti/qualità/Procedura già approvata.md",
+    "seed": "S07:2",
+    "size": 640
+  },
+  {
+    "path": "archivio/2026/Inventario metà anno.csv",
+    "seed": "S07:3",
+    "size": 4100
+  },
+  {
+    "path": "produzione/Registro lotti.txt",
+    "seed": "S07:4",
+    "size": 3300
+  },
+  {
+    "path": "produzione/linea-1/Capacità impianto.txt",
+    "seed": "S07:5",
+    "size": 900
+  },
+  {
+    "path": "amministrazione/Elenco città e sedi.txt",
+    "seed": "S07:6",
+    "size": 1500
+  },
+  {
+    "path": "amministrazione/Scheda tecnica così com'è.txt",
+    "seed": "S07:7",
+    "size": 70
+  },
+  {
+    "path": "documenti/vuoto.txt",
+    "seed": "S07:8",
+    "size": 0
+  },
+  {
+    "path": "export/ledger-export.csv",
+    "seed": "S07:export:0",
+    "size": 1800
+  }
+]

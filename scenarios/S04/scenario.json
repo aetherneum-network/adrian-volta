@@ -1,0 +1,16 @@
+{
+  "id": "S04",
+  "title": "The healthcheck watches the process, the route answers 404",
+  "company": "Cartiera Valdora S.p.A.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "At 06:41:30Z the status service stops serving its root path while its process stays up. Its declared healthcheck is of kind process, so it keeps reporting healthy.",
+  "pass_criterion": "The end-to-end probe declares the failure at the second consecutive failing beat (first 06:42:00Z, declared 06:43:00Z): verdict FAILED, exit code 3, finding on topology.yaml / status, the console never prints RUN OK, and the rendered postmortem equals expected/postmortem.md and has a timeline and an evidence section.",
+  "lesson": "A healthcheck that probes the process proves the process; only a request through the route proves the service."
+}

@@ -1,0 +1,10 @@
+service: docs
+routers:
+  - name: docs-main
+    entrypoint: public
+    host: docs.altofonte.example
+    path_prefix: /
+    backend: docs-backend
+backends:
+  docs-backend:
+    target: "docs:3000"

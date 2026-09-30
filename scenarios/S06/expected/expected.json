@@ -1,0 +1,31 @@
+{
+  "damage": {
+    "block": "666a119ce2c7ecefc8e29e976461e3eb8aa43e70805294676c65c4a5bf422021",
+    "block_length": 1024,
+    "pack_offset": 3635,
+    "snapshot": "20260912T023110Z"
+  },
+  "exit_code": 3,
+  "fallback": {
+    "repo": "b",
+    "result": "ok",
+    "snapshot": "20260912T023145Z"
+  },
+  "findings": [
+    {
+      "also": [],
+      "class": "block_corrupt",
+      "file": "repo_a",
+      "item": "20260912T023110Z",
+      "rule": "B-010",
+      "verdict": "FAILED"
+    }
+  ],
+  "mismatched_files": [
+    "archivio/2026/Inventario metà anno.csv"
+  ],
+  "restored_count": 9,
+  "scenario": "S06",
+  "source_count": 10,
+  "verdict": "FAILED"
+}

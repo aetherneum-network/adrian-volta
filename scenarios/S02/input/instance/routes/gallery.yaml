@@ -1,0 +1,20 @@
+service: gallery
+routers:
+  - name: gallery-main
+    entrypoint: public
+    host: gallery.serrabruna.example
+    path_prefix: /
+    backend: gallery-backend
+  - name: gallery-api
+    entrypoint: public
+    host: gallery.serrabruna.example
+    path_prefix: /api
+    backend: gallery-backend
+  - name: gallery-docs
+    entrypoint: public
+    host: gallery.serrabruna.example
+    path_prefix: /docs
+    backend: gallery-backend
+backends:
+  gallery-backend:
+    target: "gallery:8000"

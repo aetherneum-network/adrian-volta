@@ -1,0 +1,9 @@
+{
+  "as_of": "2026-09-14T06:00:00Z",
+  "company": "Cartiera Valdora S.p.A.",
+  "instance_id": "S01-valdora-new-service",
+  "scope": [
+    "routing"
+  ],
+  "synthetic": true
+}

@@ -1,0 +1,62 @@
+{
+  "local": {
+    "catch_up": null,
+    "exit_code": 1,
+    "findings": [
+      {
+        "also": [],
+        "class": "tz_mixed",
+        "file": "policy/backup.yaml",
+        "item": "schedule",
+        "rule": "A-011",
+        "verdict": "ALERT"
+      }
+    ],
+    "verdict": "ALERT",
+    "windows": {
+      "covered": [],
+      "due": [],
+      "evaluable": false,
+      "missed": []
+    }
+  },
+  "scenario": "S09",
+  "utc": {
+    "catch_up": {
+      "as_of": "2026-10-25T05:40:00Z",
+      "declared": true,
+      "recorded_as_missed": [
+        "2026-10-24T00:30:00Z"
+      ],
+      "recover_window": "2026-10-25T00:30:00Z",
+      "runs": 1
+    },
+    "exit_code": 1,
+    "findings": [
+      {
+        "also": [],
+        "class": "window_missed",
+        "file": "trace.jsonl",
+        "item": "2026-10-24",
+        "rule": "A-030",
+        "verdict": "ALERT"
+      }
+    ],
+    "verdict": "ALERT",
+    "windows": {
+      "covered": [
+        "2026-10-23T00:30:00Z"
+      ],
+      "due": [
+        "2026-10-23T00:30:00Z",
+        "2026-10-24T00:30:00Z",
+        "2026-10-25T00:30:00Z"
+      ],
+      "evaluable": true,
+      "missed": [
+        "2026-10-24T00:30:00Z",
+        "2026-10-25T00:30:00Z"
+      ]
+    }
+  }
+}

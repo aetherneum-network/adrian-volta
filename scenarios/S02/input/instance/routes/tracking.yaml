@@ -1,0 +1,20 @@
+service: tracking
+routers:
+  - name: tracking-main
+    entrypoint: public
+    host: tracking.serrabruna.example
+    path_prefix: /
+    backend: tracking-backend
+  - name: tracking-api
+    entrypoint: public
+    host: tracking.serrabruna.example
+    path_prefix: /api
+    backend: tracking-backend
+  - name: tracking-docs
+    entrypoint: public
+    host: tracking.serrabruna.example
+    path_prefix: /docs
+    backend: tracking-backend
+backends:
+  tracking-backend:
+    target: "tracking:9090"

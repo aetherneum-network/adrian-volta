@@ -1,0 +1,11 @@
+service: shop
+routers:
+  - name: shop-main-2025
+    entrypoint: public
+    host: shop.serrabruna.example
+    path_prefix: /
+    backend: shop-backend
+    priority: 50
+backends:
+  shop-backend:
+    target: "shop:8080"

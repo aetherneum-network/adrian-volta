@@ -1,0 +1,16 @@
+{
+  "id": "S02",
+  "title": "Forty-one routes and one forgotten copy",
+  "company": "Molino Serrabruna S.r.l.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "Fourteen services, forty-one routers, and a copy of the shop route left in routes/archive-2025/ with another router name and a higher priority. The file provider loads sub-folders too, so the copy would win silently.",
+  "pass_criterion": "Verdict BLOCKED, exit code 2, exactly one finding that names both files; 42 entries as loaded, table not accepted, no finding on the other forty routes. With the copy set aside the same tree is accepted with 41 entries.",
+  "lesson": "A recursive provider loads what was forgotten; the lint names both files instead of picking a winner."
+}

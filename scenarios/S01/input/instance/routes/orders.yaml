@@ -1,0 +1,15 @@
+service: orders
+routers:
+  - name: orders-main
+    entrypoint: public
+    host: orders.valdora.example
+    path_prefix: /
+    backend: orders-backend
+  - name: orders-api
+    entrypoint: public
+    host: orders.valdora.example
+    path_prefix: /api
+    backend: orders-backend
+backends:
+  orders-backend:
+    target: "orders:8080"

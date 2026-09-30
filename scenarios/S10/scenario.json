@@ -1,0 +1,16 @@
+{
+  "id": "S10",
+  "title": "Retention would supersede the only verified snapshot",
+  "company": "Cartiera Valdora S.p.A.",
+  "synthetic": true,
+  "negative": true,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "keep_last is 1, prune runs before verify, and the only snapshot with a successful drill on record is the oldest of three. Retention would keep the newest, unverified one and supersede the verified one.",
+  "pass_criterion": "Verdict BLOCKED, exit code 2, finding on policy/backup.yaml / retention, decision block, nothing moved. After the newest snapshot is restored and verified on record: decision supersede, two manifests moved to superseded/, none deleted, pack unchanged, and the instance still audits OK.",
+  "lesson": "Retention never removes the last snapshot known to restore; and when it acts it moves, it does not delete."
+}

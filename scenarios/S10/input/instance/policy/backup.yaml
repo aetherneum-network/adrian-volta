@@ -1,0 +1,18 @@
+schedule:
+  at: "02:30"
+  tz: UTC
+chain:
+  - export
+  - backup_a
+  - backup_b
+  - prune
+  - verify
+source: source
+export_path: source/export/orders-export.csv
+repos:
+  a:
+    path: repo_a
+  b:
+    path: repo_b
+retention:
+  keep_last: 1

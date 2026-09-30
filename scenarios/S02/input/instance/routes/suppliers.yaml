@@ -1,0 +1,20 @@
+service: suppliers
+routers:
+  - name: suppliers-main
+    entrypoint: public
+    host: suppliers.serrabruna.example
+    path_prefix: /
+    backend: suppliers-backend
+  - name: suppliers-api
+    entrypoint: public
+    host: suppliers.serrabruna.example
+    path_prefix: /api
+    backend: suppliers-backend
+  - name: suppliers-docs
+    entrypoint: public
+    host: suppliers.serrabruna.example
+    path_prefix: /docs
+    backend: suppliers-backend
+backends:
+  suppliers-backend:
+    target: "suppliers:8080"
