@@ -21,7 +21,8 @@ the two never-events, judged by the references and not by the lab:
   admin service reachable from a public entrypoint.
 
 Results go to ``eval/results.json`` (deterministic: no durations, no clock). A blind run is
-appended to ``eval/history.json`` and can be done once.
+appended to ``eval/history.json`` with the commit it measured, and can be done once per commit:
+a new freeze tag gets its own blind run, on a seed never used before.
 """
 from __future__ import annotations
 
@@ -280,14 +281,18 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     history = jsonio.read(HISTORY) if fsx.exists(HISTORY) else {"runs": []}
+    commit = None
     if args.suite == "blind":
         if args.seed is None or not args.runner or not args.date:
             ap.error("a blind run needs --seed, --runner and --date")
         used = {s["seed"] for s in G.SUITES.values()} | {r.get("seed") for r in history["runs"]}
         if args.seed in used:
             ap.error("this seed has already been used: a blind run needs a fresh one")
-        if any(r.get("suite") == "blind" for r in history["runs"]):
-            ap.error("a blind run is already recorded in eval/history.json: it is done once")
+        commit = _commit()
+        # once per measured commit; when the commit cannot be read, any recorded blind run refuses
+        if any(r.get("suite") == "blind" and (r.get("commit") == commit or commit == "[TO CONFIRM]")
+               for r in history["runs"]):
+            ap.error("a blind run of this commit is already recorded in eval/history.json: it is done once per frozen commit")
         styles = [s for s in args.styles.split(",") if s]
         unknown = [s for s in styles if s not in yamlout.ALL_STYLES + ["tz-alias"]]
         if unknown:
@@ -329,7 +334,7 @@ def main(argv=None) -> int:
     print(table(args.suite, metrics))
     if args.suite == "blind":
         history["runs"].append({"suite": "blind", "when": args.date, "runner": args.runner, "seed": seed,
-                                "commit": _commit(), "metrics": metrics,
+                                "commit": commit, "metrics": metrics,
                                 "note": "blind run after the freeze: seed and styles chosen by the runner"})
         jsonio.write(HISTORY, history)
         print("recorded in eval/history.json")

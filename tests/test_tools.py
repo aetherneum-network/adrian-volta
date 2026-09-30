@@ -267,6 +267,40 @@ class ScorerCommandLine(unittest.TestCase):
             if run["suite"] == "blind":
                 self.assertNotIn("synthetic alumnus", run["runner"])
 
+    def test_the_seed_of_the_recorded_blind_run_cannot_be_used_again(self):
+        history = jsonio.read(os.path.join(U.ROOT, "eval", "history.json"))
+        for seed in sorted({run["seed"] for run in history["runs"] if run["suite"] == "blind"}):
+            message = self.fails("--suite", "blind", "--seed", str(seed), "--runner", "x", "--date", "2026-10-01")
+            self.assertIn("already been used", message)
+
+
+class BlindRunOncePerCommit(U.TempCase):
+    """The gate of the blind run: once per measured commit. Argument checks only - nothing is generated."""
+
+    ARGS = ("--suite", "blind", "--seed", "5", "--runner", "x", "--date", "2026-10-01", "--styles", "bom,handwriting")
+
+    def fails_with(self, recorded_commit: str, current_commit: str) -> str:
+        path = self.path("history.json")
+        jsonio.write(path, {"runs": [{"suite": "blind", "seed": 77, "commit": recorded_commit, "when": "2026-09-30",
+                                      "runner": "someone else", "metrics": {}}]})
+        err = io.StringIO()
+        with mock.patch.object(score, "HISTORY", path), mock.patch.object(score, "_commit", return_value=current_commit), \
+                self.assertRaises(SystemExit) as caught, redirect_stderr(err), redirect_stdout(io.StringIO()):
+            score.main(list(self.ARGS))
+        self.assertEqual(caught.exception.code, 2)
+        return err.getvalue()
+
+    def test_a_second_blind_run_on_the_same_commit_is_refused(self):
+        self.assertIn("already recorded", self.fails_with("abc123", "abc123"))
+
+    def test_a_new_frozen_commit_passes_the_gate_and_stops_at_the_next_check(self):
+        message = self.fails_with("abc123", "def456")
+        self.assertNotIn("already recorded", message)
+        self.assertIn("unknown style", message)
+
+    def test_when_the_commit_cannot_be_read_any_recorded_blind_run_refuses(self):
+        self.assertIn("already recorded", self.fails_with("abc123", "[TO CONFIRM]"))
+
 
 if __name__ == "__main__":
     unittest.main()
