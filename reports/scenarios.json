@@ -1,0 +1,76 @@
+{
+  "passed": 10,
+  "scenarios": [
+    {
+      "checks": 18,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S01",
+      "summary": "one file added, 1 route added, 0 removed, 0 changed, table accepted"
+    },
+    {
+      "checks": 16,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S02",
+      "summary": "42 routes loaded, 1 duplicate found with both files named, table refused; 41 accepted without the copy"
+    },
+    {
+      "checks": 14,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S03",
+      "summary": "admin service on the public plane refused twice (router, network); accepted table has 0 admin-public edges"
+    },
+    {
+      "checks": 20,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S04",
+      "summary": "process healthy, route 404: declared FAILED at the second beat, postmortem rendered"
+    },
+    {
+      "checks": 16,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S05",
+      "summary": "11 of 11 files restored, every SHA-256 equal to the source, 0 differing"
+    },
+    {
+      "checks": 16,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S06",
+      "summary": "1 byte flipped in 1 block: restore FAILED, 1 file named, fallback on repository b declared and verified"
+    },
+    {
+      "checks": 12,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S07",
+      "summary": "job log says ok, secondary repository 72 h behind (limit 26 h): ALERT with as_of, primary drill ok"
+    },
+    {
+      "checks": 17,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S08",
+      "summary": "backup before export: snapshot holds yesterday's export, FAILED on 1 file; chain in order: today's export, OK"
+    },
+    {
+      "checks": 22,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S09",
+      "summary": "2 windows missed across the DST change: 1 declared catch-up run, all times UTC; local-time schedule: abstains"
+    },
+    {
+      "checks": 22,
+      "checks_failed": [],
+      "pass": true,
+      "scenario": "S10",
+      "summary": "retention refused while it would supersede the only verified snapshot; after a verified drill: 2 manifests moved, 0 deleted"
+    }
+  ],
+  "total": 10
+}
