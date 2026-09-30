@@ -1,0 +1,53 @@
+# Offline CI of the proof pack. The only step that uses the network is the installation of the
+# one pinned dependency, verified by hash. After that nothing opens a socket: the tests replace
+# the socket constructors and fail if anything tries. No secret is read, no container is started,
+# no model or API is called.
+#
+# Status: this workflow has been written, not executed (nothing has been pushed from the branch
+# it was written on). The first run on a Linux runner is the first time the pack runs on Linux.
+# Pins still to be made by the maintainers: action versions by commit SHA [TO CONFIRM], and the
+# digest of the runner image [TO CONFIRM]. They are not guessed here.
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  proof-pack:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4          # commit SHA pin: [TO CONFIRM]
+      - uses: actions/setup-python@v5      # commit SHA pin: [TO CONFIRM]
+        with:
+          python-version: "3.12"
+      - name: Install the pinned dependency (hash-checked; last step that may use the network)
+        run: python -m pip install --require-hashes -r requirements.txt
+      - name: Regenerate the development corpus in memory and compare with its manifest
+        run: python corpus/generate.py --check
+      - name: Tracked files against MANIFEST.sha256
+        run: python tools/manifest.py --check
+      - name: Test suite (standard-library unittest, sockets blocked)
+        run: python -m unittest discover -s tests -t .
+      - name: Scenarios S01-S10, one PASS/FAIL line each
+        run: python scenarios/run_all.py --json build/ci/scenarios.json
+      - name: The scenario results are the committed ones
+        run: cmp build/ci/scenarios.json reports/scenarios.json
+      - name: Content scanner
+        run: python tools/scan.py
+      - name: Two rebuilds in two folders, same bytes, and the digest recorded in the repository
+        run: |
+          python tools/rebuild.py --out build/ci/one
+          python tools/rebuild.py --out "build/ci/due volte"
+          cmp build/ci/one/REBUILD.sha256 "build/ci/due volte/REBUILD.sha256"
+          cmp build/ci/one/REBUILD.sha256 reports/REBUILD.sha256
