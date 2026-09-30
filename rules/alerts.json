@@ -1,0 +1,101 @@
+{
+  "version": "2026.09.30-2",
+  "kind": "alerts",
+  "note": "Four ordered sections, each decides on one subject: the schedule, the job timestamps, the nightly windows, the secondary repository. First match wins. 'windows: abstain' means the window evaluation is not performed: a schedule in local time or a timestamp without a zone is not converted by guesswork.",
+  "params": {
+    "utc_names": ["UTC", "Etc/UTC", "Z"],
+    "grace_s": 5400,
+    "lookback_days": 3,
+    "default_max_lag_hours": 26
+  },
+  "schedule_rules": [
+    {
+      "id": "A-010",
+      "when": {"at_valid": false},
+      "then": {"class": "policy_unreadable", "windows": "abstain"},
+      "rationale": "A schedule time that is not written HH:MM (for instance an unquoted value that YAML reads as a number) is not interpreted.",
+      "tests": [
+        {"id": "A-010-a", "input": {"at_valid": false, "tz_is_utc": true}, "expect": {"class": "policy_unreadable", "windows": "abstain"}}
+      ]
+    },
+    {
+      "id": "A-011",
+      "when": {"tz_is_utc": false},
+      "then": {"class": "tz_mixed", "windows": "abstain"},
+      "rationale": "Scheduled work is anchored to UTC. A schedule in local time moves with daylight saving and, once a year, names an hour that happens twice.",
+      "tests": [
+        {"id": "A-011-a", "input": {"at_valid": true, "tz_is_utc": false}, "expect": {"class": "tz_mixed", "windows": "abstain"}}
+      ]
+    }
+  ],
+  "timestamp_rules": [
+    {
+      "id": "A-020",
+      "when": {"invalid": {"ge": 1}},
+      "then": {"class": "trace_unreadable", "windows": "abstain"},
+      "rationale": "A job timestamp that is not a timestamp: the trace cannot be trusted for timing.",
+      "tests": [
+        {"id": "A-020-a", "input": {"invalid": 1, "naive": 0, "offset": 0}, "expect": {"class": "trace_unreadable"}}
+      ]
+    },
+    {
+      "id": "A-021",
+      "when": {"naive": {"ge": 1}},
+      "then": {"class": "tz_mixed", "windows": "abstain"},
+      "rationale": "A timestamp without a zone does not say which instant it is. Windows are not evaluated on guessed instants.",
+      "tests": [
+        {"id": "A-021-a", "input": {"invalid": 0, "naive": 2, "offset": 0}, "expect": {"class": "tz_mixed", "windows": "abstain"}}
+      ]
+    },
+    {
+      "id": "A-022",
+      "when": {"offset": {"ge": 1}},
+      "then": {"class": "tz_mixed", "windows": "evaluate"},
+      "rationale": "A timestamp with an explicit offset is a known instant, so windows are still evaluated, but mixing local offsets with UTC in one trace is reported.",
+      "tests": [
+        {"id": "A-022-a", "input": {"invalid": 0, "naive": 0, "offset": 3}, "expect": {"class": "tz_mixed", "windows": "evaluate"}}
+      ]
+    }
+  ],
+  "window_rules": [
+    {
+      "id": "A-030",
+      "when": {"evaluable": true, "missed": {"ge": 1}},
+      "then": {"class": "window_missed", "catch_up": "declare"},
+      "rationale": "A due window with no run inside its grace period was missed. The next run recovers the latest window once and says so; it does not pretend the night ran.",
+      "tests": [
+        {"id": "A-030-a", "input": {"evaluable": true, "missed": 1}, "expect": {"class": "window_missed", "catch_up": "declare"}}
+      ]
+    }
+  ],
+  "repo_rules": [
+    {
+      "id": "A-035",
+      "when": {"secondary_readable": false},
+      "then": {"class": "repo_b_unreadable"},
+      "rationale": "A secondary repository whose newest snapshot cannot be read has an unknown age. Unknown is reported, it is not treated as fresh.",
+      "tests": [
+        {"id": "A-035-a", "input": {"secondary_readable": false}, "expect": {"class": "repo_b_unreadable"}},
+        {"id": "A-035-b", "input": {"secondary_readable": false, "secondary_has_snapshots": true, "lag_exceeds_max": false}, "expect": {"class": "repo_b_unreadable"}}
+      ]
+    },
+    {
+      "id": "A-040",
+      "when": {"secondary_has_snapshots": false},
+      "then": {"class": "repo_b_stale"},
+      "rationale": "A secondary repository without any snapshot is not a second copy.",
+      "tests": [
+        {"id": "A-040-a", "input": {"secondary_readable": true, "secondary_has_snapshots": false}, "expect": {"class": "repo_b_stale"}}
+      ]
+    },
+    {
+      "id": "A-041",
+      "when": {"lag_exceeds_max": true},
+      "then": {"class": "repo_b_stale"},
+      "rationale": "The newest snapshot of the secondary repository is older than the newest of the primary by more than the allowed lag. The repository is read; the status a job printed is not evidence.",
+      "tests": [
+        {"id": "A-041-a", "input": {"secondary_readable": true, "secondary_has_snapshots": true, "lag_exceeds_max": true}, "expect": {"class": "repo_b_stale"}}
+      ]
+    }
+  ]
+}
