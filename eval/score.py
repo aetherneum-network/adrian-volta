@@ -42,6 +42,48 @@ RESULTS = os.path.join(ROOT, "eval", "results.json")
 HISTORY = os.path.join(ROOT, "eval", "history.json")
 BUILD = os.path.join(ROOT, "build", "eval")
 DATA_CLASSES = ("backup_truncated", "block_corrupt", "job_order_inverted")
+VERDICTS = ("OK", "ALERT", "BLOCKED", "FAILED")
+ALL_SCOPE = ("routing", "health", "backup")
+_REFERENCE_ERRORS = (OSError, ValueError, KeyError, TypeError, AttributeError, IndexError)
+LABEL_KEYS = ("clean", "faults", "instance", "verdict")
+FAULT_KEYS = ("also", "class", "file", "items", "mismatched_files", "variant", "verdict")
+
+
+def load_handwritten(folder: str, reserved_prefix: str) -> list:
+    """Labels of the hand-written instances, checked before anything is generated or audited.
+
+    A label that cannot be read is an error said at once: it is never completed by guessing.
+    """
+    path = os.path.join(folder, "labels.jsonl")
+    if not fsx.isfile(path):
+        raise ValueError("labels.jsonl not found in the folder")
+    golds = jsonio.read_jsonl(path)
+    seen = set()
+    for number, gold in enumerate(golds, start=1):
+        where = f"labels.jsonl line {number}"
+        if not isinstance(gold, dict) or any(key not in gold for key in LABEL_KEYS):
+            raise ValueError(f"{where}: an object with the keys {', '.join(LABEL_KEYS)} is needed")
+        name = gold["instance"]
+        if not isinstance(name, str) or not name or "/" in name or chr(92) in name or name.startswith("."):
+            raise ValueError(f"{where}: 'instance' must be the name of a sub-folder")
+        if name in seen or name.startswith(reserved_prefix):
+            raise ValueError(f"{where}: instance name '{name}' is repeated or starts with '{reserved_prefix}'")
+        seen.add(name)
+        if not os.path.isdir(fsx.ext(os.path.join(folder, name))):
+            raise ValueError(f"{where}: folder '{name}' not found")
+        if gold["verdict"] not in VERDICTS or not isinstance(gold["clean"], bool) or not isinstance(gold["faults"], list):
+            raise ValueError(f"{where}: 'verdict' must be one of {', '.join(VERDICTS)}, 'clean' true or false, 'faults' a list")
+        if gold["clean"] != (not gold["faults"]) or (gold["clean"] and gold["verdict"] != "OK"):
+            raise ValueError(f"{where}: a clean instance has no fault and verdict OK; any other has at least one fault")
+        for fault in gold["faults"]:
+            if not isinstance(fault, dict) or any(key not in fault for key in FAULT_KEYS):
+                raise ValueError(f"{where}: every fault needs the keys {', '.join(FAULT_KEYS)}")
+            if not isinstance(fault["class"], str) or not isinstance(fault["file"], str) or fault["verdict"] not in VERDICTS:
+                raise ValueError(f"{where}: 'class' and 'file' are strings, 'verdict' one of {', '.join(VERDICTS)}")
+            if not isinstance(fault["also"], list) or not isinstance(fault["mismatched_files"], list) or not (
+                    fault["items"] is None or isinstance(fault["items"], list)):
+                raise ValueError(f"{where}: 'also' and 'mismatched_files' are lists, 'items' a list or null")
+    return golds
 
 
 def matches(finding: dict, fault: dict) -> bool:
@@ -52,14 +94,59 @@ def matches(finding: dict, fault: dict) -> bool:
     return fault["items"] is None or finding["item"] in fault["items"]
 
 
+def declared_scope(instance_dir: str) -> list | None:
+    """The parts an instance declares, read here without the lab; ``None`` when that cannot be read."""
+    try:
+        doc = json.loads(fsx.read_bytes(os.path.join(instance_dir, "instance.json")).decode("utf-8"))
+        scope = doc.get("scope", list(ALL_SCOPE))
+    except (OSError, ValueError, AttributeError):
+        return None
+    return scope if isinstance(scope, list) and scope and all(part in ALL_SCOPE for part in scope) else None
+
+
+def _ask(reference, instance_dir: str):
+    try:
+        return reference(instance_dir)
+    except _REFERENCE_ERRORS:
+        return None
+
+
 def reference_view(instance_dir: str) -> dict:
-    """What the three references say about one instance, in gold vocabulary."""
-    routing = reference_routes.check(instance_dir)
-    health = reference_reach.check(instance_dir)
-    hashes = reference_hashes.check(instance_dir)
-    return {"findings": routing + health, "edges": reference_reach.matrix(instance_dir)["admin_public_edges"],
-            "a_differing": hashes["repos"]["a"]["differing"], "b_differing": hashes["repos"]["b"]["differing"],
-            "secondary_stale": hashes["secondary_stale"]}
+    """What the three references say about one instance, in gold vocabulary.
+
+    A part outside the declared scope is not judged. A part that is in scope but that its reference
+    cannot read is listed in ``unread``: nobody vouches for it, so the lab is not allowed to have
+    called it good (see ``score``). Every generated instance has the three parts, all judged.
+    """
+    view = {"findings": [], "edges": [], "a_differing": None, "b_differing": None, "secondary_stale": None,
+            "judged": [], "unread": []}
+    scope = declared_scope(instance_dir)
+    if scope is None:
+        return view
+    if "routing" in scope:
+        routing, world = _ask(reference_routes.check, instance_dir), _ask(reference_reach.matrix, instance_dir)
+        if routing is None or world is None:
+            view["unread"].append("routing")
+        else:
+            view["findings"] += routing
+            view["edges"] = world["admin_public_edges"]
+            view["judged"].append("routing")
+    if "health" in scope:
+        health = _ask(reference_reach.check, instance_dir)
+        if health is None:
+            view["unread"].append("health")
+        else:
+            view["findings"] += health
+            view["judged"].append("health")
+    if "backup" in scope:
+        hashes = _ask(reference_hashes.check, instance_dir)
+        if hashes is None:
+            view["unread"].append("backup")
+        else:
+            view.update({"a_differing": hashes["repos"]["a"]["differing"], "b_differing": hashes["repos"]["b"]["differing"],
+                         "secondary_stale": hashes["secondary_stale"]})
+            view["judged"].append("backup")
+    return view
 
 
 def gold_agrees_with_references(gold: dict, ref: dict) -> list:
@@ -104,7 +191,7 @@ def score(golds: list, corpus_dir: str, work_dir: str, details_path: str | None)
             out["false_alarms_on_clean"] += 1
             row["notes"].append("false alarm on a clean instance")
         for fault in gold["faults"]:
-            c = classes[fault["class"]]
+            c = classes.setdefault(fault["class"], {"planted": 0, "detected": 0, "localised": 0})   # hand-written labels may name other classes
             c["planted"] += 1
             c["detected"] += any(f["class"] == fault["class"] for f in findings)
             hit = any(matches(f, fault) for f in findings)
@@ -123,19 +210,25 @@ def score(golds: list, corpus_dir: str, work_dir: str, details_path: str | None)
                 out["spurious_by_class"][f["class"]] = out["spurious_by_class"].get(f["class"], 0) + 1
                 row["notes"].append(f"spurious: {f['class']} {f['file']} {f['item']}")
         drill, fallback = report.get("drill"), report.get("fallback")
-        if (drill and drill["result"] == "ok" and ref["a_differing"]) or (
-                fallback and fallback["result"] == "ok" and ref["b_differing"]):
+        unvouched = "backup" in ref["unread"]      # the reference could not read it: "ok" is not acceptable either
+        if (drill and drill["result"] == "ok" and (unvouched or ref["a_differing"])) or (
+                fallback and fallback["result"] == "ok" and (unvouched or ref["b_differing"])):
             out["never_event_restore"] += 1
             row["notes"].append("NEVER-EVENT: restore declared ok while the reference finds differing files")
         accepted = (report.get("routes") or {}).get("accepted")
-        if accepted and (ref["edges"] or any(r["class"] == "admin_on_public" for r in ref["findings"])):
+        if accepted and ("routing" in ref["unread"] or ref["edges"]
+                         or any(r["class"] == "admin_on_public" for r in ref["findings"])):
             out["never_event_admin_public"] += 1
             row["notes"].append("NEVER-EVENT: table accepted while the reference finds an admin-public edge")
-        out["reference_covered_instances"] += 1
-        problems = gold_agrees_with_references(gold, ref)
-        if problems:
-            out["gold_reference_disagreements"] += 1
-            row["notes"].extend("gold/reference: " + p for p in problems)
+        if sorted(ref["judged"]) == sorted(ALL_SCOPE):
+            out["reference_covered_instances"] += 1
+            problems = gold_agrees_with_references(gold, ref)
+            if problems:
+                out["gold_reference_disagreements"] += 1
+                row["notes"].extend("gold/reference: " + p for p in problems)
+        else:
+            row["notes"].append("references judged: " + (", ".join(ref["judged"]) or "nothing")
+                                + ("; could not read: " + ", ".join(ref["unread"]) if ref["unread"] else ""))
         details.append(row)
     out["classes"] = classes
     planted = sum(c["planted"] for c in classes.values())
@@ -203,20 +296,26 @@ def main(argv=None) -> int:
             ap.error("--date must be written YYYY-MM-DD")
         seed, per, count = args.seed, args.faults_per_instance, args.count
     else:
+        if args.handwritten:
+            ap.error("--handwritten goes with --suite blind")
         spec = G.SUITES[args.suite]
         seed, per, styles, count = spec["seed"], spec["faults"], spec["styles"], G.COUNT
+
+    extra = []
+    if args.handwritten:
+        try:
+            extra = load_handwritten(args.handwritten, args.suite + "-")
+        except (ValueError, OSError) as exc:
+            ap.error(f"hand-written instances: {exc}")
 
     base = os.path.join(BUILD, args.suite)
     corpus_dir, work_dir = os.path.join(base, "corpus"), os.path.join(base, "work")
     fsx.rmtree(work_dir)
     golds = G.generate(seed, args.suite, count, per, styles, corpus_dir)
-    handwritten = 0
-    if args.handwritten:
-        extra = jsonio.read_jsonl(os.path.join(args.handwritten, "labels.jsonl"))
-        for gold in extra:
-            fsx.copytree(os.path.join(args.handwritten, gold["instance"]), os.path.join(corpus_dir, gold["instance"]))
-        golds += extra
-        handwritten = len(extra)
+    for gold in extra:
+        fsx.copytree(os.path.join(args.handwritten, gold["instance"]), os.path.join(corpus_dir, gold["instance"]))
+    golds += extra
+    handwritten = len(extra)
     keep_details = args.suite in ("dev", "stress", "blind")
     metrics = score(golds, corpus_dir, work_dir, os.path.join(base, "details.jsonl") if keep_details else None)
     metrics.update({"seed": seed, "faults_per_instance": per, "styles": styles, "handwritten": handwritten})

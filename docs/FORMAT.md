@@ -186,6 +186,13 @@ The verdict of a run is the most severe one among its findings (`rules/severity.
 A clean instance has `"clean": true, "verdict": "OK", "faults": []`. The label is written from what
 the author of the instance *did* to it, before the lab is run on it - never from the lab's output.
 
+Every key shown above is required, in the label and in each fault; `variant` is free text (`hand`
+for a hand-written instance) and `decoys` may be left out. A hand-written fault may name a class
+that the generator does not plant: use the class names of section 2. The scorer checks the labels
+before it generates or audits anything and refuses a file it cannot use; it never completes or
+repairs a label. Instance names must not start with `blind-`, which is the prefix of the generated
+instances of a blind run.
+
 A fault is **detected** when a finding of its class exists, and **localised** when class, file(s)
 and item all match. A finding that matches no fault is **spurious**.
 
@@ -200,3 +207,8 @@ and item all match. A finding that matches no fault is **spurious**.
 `window_missed`, `tz_mixed`, `retention_deletes_only_valid` and the policy-order variant of
 `job_order_inverted` have **no independent reference**: their gold is the fault plan only. This is
 stated next to the numbers in the README.
+
+An instance whose `scope` leaves a part out is judged by the references for the parts it has, and
+is not counted among the instances fully covered by the references. When a part is in scope but
+its reference cannot read it, nobody vouches for that part: if the lab nevertheless called a
+restore successful, or accepted the route table, the scorer counts a never-event.

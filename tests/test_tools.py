@@ -3,6 +3,7 @@ import io
 import os
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from unittest import mock
 
 import yaml
 
@@ -130,6 +131,92 @@ class ComposeProfile(unittest.TestCase):
                 self.assertNotIn(command, source, rel)
 
 
+class HandWrittenLabels(U.TempCase):
+    """The ten instances a different hand writes for the blind run: their labels are checked, never completed."""
+
+    FAULT = {"class": "route_wrong_port", "variant": "hand", "verdict": "BLOCKED", "file": "routes/shop.yaml", "also": [],
+             "items": ["shop-main"], "mismatched_files": []}
+
+    def folder(self, labels: list, make=("hand-0001",)) -> str:
+        root = self.path("hand")
+        for name in make:
+            U.routing_instance(os.path.join(root, name), U.topology_doc(), {"routes/shop.yaml": U.route_doc("shop", 8081)})
+        jsonio.write_jsonl(os.path.join(root, "labels.jsonl"), labels)
+        return root
+
+    def label(self, **changes) -> dict:
+        return dict({"instance": "hand-0001", "clean": False, "verdict": "BLOCKED", "faults": [dict(self.FAULT)]}, **changes)
+
+    def test_a_good_label_is_read_and_a_class_the_generator_does_not_plant_is_scored(self):
+        root = self.folder([self.label()])
+        golds = score.load_handwritten(root, "blind-")
+        self.assertEqual([g["instance"] for g in golds], ["hand-0001"])
+        self.assertNotIn("route_wrong_port", G.CLASSES)
+        metrics = score.score(golds, root, self.path("work"), None)
+        self.assertEqual(metrics["classes"]["route_wrong_port"], {"planted": 1, "detected": 1, "localised": 1})
+        self.assertEqual([metrics["verdict_correct"], metrics["spurious_findings"], metrics["planted_faults"]], [1, 0, 1])
+        # a routing-only instance: the references judge the part that exists and the instance is not counted as fully covered
+        self.assertEqual(score.reference_view(os.path.join(root, "hand-0001"))["judged"], ["routing"])
+        self.assertEqual([metrics["reference_covered_instances"], metrics["never_event_admin_public"], metrics["never_event_restore"]], [0, 0, 0])
+
+    def test_a_part_the_reference_cannot_read_is_not_vouched_for(self):
+        root = self.folder([self.label(verdict="OK", clean=True, faults=[])])
+        inst = os.path.join(root, "hand-0001")
+        fsx.write_bytes(os.path.join(inst, "instance.json"), b'{"instance_id": "hand-0001", "as_of": "2026-09-14T06:00:00Z", "scope": ["routing", "backup"]}')
+        view = score.reference_view(inst)
+        self.assertEqual([view["judged"], view["unread"], view["a_differing"]], [["routing"], ["backup"], None])
+        fsx.write_bytes(os.path.join(inst, "instance.json"), b"{")
+        self.assertEqual(score.reference_view(inst)["judged"], [])
+        self.assertIsNone(score.declared_scope(inst))
+
+    def test_a_label_that_is_wrong_about_the_instance_is_counted_against_the_lab_not_repaired(self):
+        root = self.folder([self.label(faults=[dict(self.FAULT, items=["another-router"])])])
+        metrics = score.score(score.load_handwritten(root, "blind-"), root, self.path("work"), None)
+        self.assertEqual(metrics["classes"]["route_wrong_port"], {"planted": 1, "detected": 1, "localised": 0})
+        self.assertEqual(metrics["spurious_findings"], 1)
+
+    def test_a_restore_called_ok_that_no_reference_vouches_for_counts_as_a_never_event(self):
+        U.backup_instance(self.path("corpus", "one"), "unvouched")
+        gold = {"instance": "one", "clean": True, "verdict": "OK", "faults": []}
+        control = score.score([gold], self.path("corpus"), self.path("work-control"), None)
+        self.assertEqual([control["never_event_restore"], control["verdict_correct"]], [0, 1])
+        with mock.patch.object(score.reference_hashes, "check", side_effect=ValueError("cannot be read")):
+            metrics = score.score([gold], self.path("corpus"), self.path("work"), None)
+        self.assertEqual(metrics["never_event_restore"], 1)
+        self.assertEqual(metrics["reference_covered_instances"], 0)
+
+    def test_labels_that_cannot_be_used_are_refused(self):
+        fault = dict(self.FAULT)
+        cases = {
+            "is needed": [{"instance": "hand-0001", "clean": True}],
+            "an object with the keys": [["hand-0001"]],
+            "sub-folder": [self.label(instance="a/b")],
+            "repeated": [self.label(), self.label()],
+            "starts with": [self.label(instance="blind-0001")],
+            "not found": [self.label(instance="hand-0002")],
+            "must be one of": [self.label(verdict="GREEN")],
+            "a clean instance has no fault": [self.label(clean=True)],
+            "any other has at least one fault": [self.label(faults=[])],
+            "verdict OK": [self.label(clean=True, faults=[], verdict="ALERT")],
+            "every fault needs": [self.label(faults=[{"class": "route_wrong_port"}])],
+            "'items' a list or null": [self.label(faults=[dict(fault, items="shop-main")])],
+        }
+        for n, (expected, labels) in enumerate(cases.items()):
+            with self.subTest(case=expected):
+                root = self.folder(labels, make=("hand-0001", "blind-0001"))
+                with self.assertRaises(ValueError) as caught:
+                    score.load_handwritten(root, "blind-")
+                self.assertIn(expected, str(caught.exception))
+
+    def test_a_missing_or_broken_labels_file_is_refused(self):
+        with self.assertRaises(ValueError):
+            score.load_handwritten(self.path("nothing"), "blind-")
+        root = self.folder([self.label()])
+        fsx.write_bytes(os.path.join(root, "labels.jsonl"), b'{"instance": "hand-0001", ')
+        with self.assertRaises(ValueError):
+            score.load_handwritten(root, "blind-")
+
+
 class ScorerCommandLine(unittest.TestCase):
     """Argument checks only: no suite is generated or scored here (and never a blind one)."""
 
@@ -156,6 +243,15 @@ class ScorerCommandLine(unittest.TestCase):
     def test_a_blind_run_refuses_a_date_that_is_not_a_date(self):
         message = self.fails("--suite", "blind", "--seed", "5", "--runner", "x", "--date", "tomorrow")
         self.assertIn("YYYY-MM-DD", message)
+
+    def test_hand_written_instances_go_with_a_blind_run_only(self):
+        self.assertIn("goes with --suite blind", self.fails("--suite", "dev", "--handwritten", "somewhere"))
+
+    def test_a_blind_run_with_unreadable_hand_written_labels_stops_before_anything_is_generated(self):
+        message = self.fails("--suite", "blind", "--seed", "5", "--runner", "x", "--date", "2026-10-01",
+                             "--handwritten", os.path.join(U.ROOT, "docs"))
+        self.assertIn("hand-written instances: labels.jsonl not found", message)
+        self.assertFalse(os.path.exists(os.path.join(U.ROOT, "build", "eval", "blind")))
 
     def test_the_history_holds_the_development_runs_and_no_blind_run_by_the_author(self):
         path = os.path.join(U.ROOT, "eval", "history.json")
