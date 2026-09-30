@@ -1113,6 +1113,119 @@
       "seed": 20261002,
       "suite": "stress",
       "when": "2026-09-30T19:44:30Z"
+    },
+    {
+      "commit": "6d82ad17f9131046d948bc5343a052ba6ef1e841",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "backup_truncated": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "block_corrupt": {
+            "detected": 29,
+            "localised": 29,
+            "planted": 29
+          },
+          "health_probes_process": {
+            "detected": 38,
+            "localised": 38,
+            "planted": 38
+          },
+          "job_order_inverted": {
+            "detected": 27,
+            "localised": 27,
+            "planted": 27
+          },
+          "repo_b_stale": {
+            "detected": 23,
+            "localised": 23,
+            "planted": 23
+          },
+          "repo_b_unreadable": {
+            "detected": 1,
+            "localised": 1,
+            "planted": 1
+          },
+          "restart_loop": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "retention_deletes_only_valid": {
+            "detected": 23,
+            "localised": 23,
+            "planted": 23
+          },
+          "route_duplicate_shadow": {
+            "detected": 33,
+            "localised": 33,
+            "planted": 33
+          },
+          "route_missing_service": {
+            "detected": 36,
+            "localised": 36,
+            "planted": 36
+          },
+          "route_wrong_port": {
+            "detected": 1,
+            "localised": 1,
+            "planted": 1
+          },
+          "tz_mixed": {
+            "detected": 22,
+            "localised": 22,
+            "planted": 22
+          },
+          "window_missed": {
+            "detected": 21,
+            "localised": 21,
+            "planted": 21
+          }
+        },
+        "clean": 75,
+        "detected": 347,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 2,
+        "gold_reference_disagreements": 0,
+        "handwritten": 10,
+        "instances": 250,
+        "localised": 347,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 347,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 243,
+        "restore_lists_exact": 87,
+        "restore_lists_planted": 87,
+        "seed": 20261012,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [
+          "single-quoted",
+          "doc-markers",
+          "bom",
+          "anchors",
+          "port-string",
+          "tz-alias",
+          "crlf",
+          "comments"
+        ],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 250
+      },
+      "note": "blind run after the freeze: seed and styles chosen by the runner",
+      "runner": "evaluator (Claude Fable 5.1), not the builder",
+      "seed": 20261012,
+      "suite": "blind",
+      "when": "2026-09-30"
     }
   ]
 }

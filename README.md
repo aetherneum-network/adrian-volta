@@ -63,11 +63,12 @@ rules that find them have the same author. None of them is accuracy on a real sy
 | stress suite (diagnostic: two faults per instance, perturbed YAML) | 20261002 | first run: detected 335/336, 1 spurious finding. After a rule fix, no longer a first run: localised 336/336, 0 spurious; verdict 240/240; false alarms 0/72 | `eval/history.json` |
 | blind run of `v2.0.0-freeze`, 2026-09-30, run by the evaluator (Claude Opus 5.5, not the builder) | 20261011 | 250 instances (75 clean, 10 hand-written), 343 faults, two per instance, six reserved styles: detected 342/343, localised 342/343; verdict 249/250; false alarms 0/75; spurious 0; restore lists exact 85/85; **never-events 1** (restore) and 0 - a failed pack | `eval/history.json` |
 | correction after the blind run, **no longer blind** | - | the three misses are one hand-written instance (secondary index cut in half, audited OK): finding T17, fixed in `v2.0.1-freeze` with `rules/alerts.json` 2026.09.30-3 and `rules/backup_policy.json` 2026.09.30-2; the instance is now a test | `CHANGELOG.md` |
-| blind run of `v2.0.1-freeze` | chosen by a different hand | **not run yet** - `eval/BLIND_PROTOCOL.md` | - |
+| blind run of `v2.0.1-freeze`, 2026-09-30, run by the evaluator (Claude Fable 5.1, not the builder) | 20261012 | 250 instances (75 clean, 10 hand-written), 347 faults, 2 per instance, 8 styles chosen by the runner: detected 347/347, localised 347/347; verdict 250/250; false alarms 0/75; spurious 0; restore lists exact 87/87; never-events 0 (restore) and 0 | `eval/history.json` |
 | two rebuilds in two folders | 20260930 | byte-identical, 10376 files, SHA-256 `7454103ed44ca25212954c0ca1596a9f31455456489b8a68f5ef59409ea39a3b` | `reports/REBUILD.sha256` |
 
 The development and holdout suites are saturated, which says little: the honest datum is the
-blind run. The first one failed the pack on one instance; the fix has not been measured blind.
+blind run. The first one failed the pack on one instance; the second, on the fixed code, found no
+never-event.
 Four fault classes (missed window, mixed time zones, retention, and the policy-order variant of
 the inverted chain) have no independent reference: their gold is the fault plan only.
 Every run, the bad first ones included, is in `eval/history.json`.
