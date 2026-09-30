@@ -1,0 +1,54 @@
+{
+  "version": "2026.09.30-2",
+  "kind": "severity",
+  "note": "Maps a finding class to a verdict. Ordered, first match wins; the last rule catches every class nobody listed, so an unknown class is never OK. BLOCKED = a change or an action is refused before it happens. FAILED = a check or an operation did not hold. ALERT = the run completed but the state needs attention. The verdict of a run is the first verdict of 'precedence' present among its findings.",
+  "params": {
+    "precedence": ["FAILED", "BLOCKED", "ALERT", "OK"],
+    "exit_codes": {"OK": 0, "ALERT": 1, "BLOCKED": 2, "FAILED": 3}
+  },
+  "rules": [
+    {
+      "id": "S-010",
+      "when": {"class": {"in": ["admin_on_public", "route_missing_service", "route_duplicate_shadow", "route_wrong_port", "route_unreadable", "topology_unreadable", "policy_unreadable", "retention_deletes_only_valid", "retention_unreadable"]}},
+      "then": {"verdict": "BLOCKED"},
+      "rationale": "A route table or a retention plan with one of these defects is refused as a whole: nothing is published, nothing is removed. Unreadable input is refused for the same reason: the lab does not guess what a file meant.",
+      "tests": [
+        {"id": "S-010-a", "input": {"class": "admin_on_public"}, "expect": {"verdict": "BLOCKED"}},
+        {"id": "S-010-b", "input": {"class": "retention_deletes_only_valid"}, "expect": {"verdict": "BLOCKED"}},
+        {"id": "S-010-c", "input": {"class": "route_unreadable"}, "expect": {"verdict": "BLOCKED"}}
+      ]
+    },
+    {
+      "id": "S-020",
+      "when": {"class": {"in": ["repo_b_stale", "repo_b_unreadable", "window_missed", "tz_mixed"]}},
+      "then": {"verdict": "ALERT"},
+      "rationale": "The run completed and the primary restore held, but the state is older or less certain than the job log claims. The alert always carries its as_of.",
+      "tests": [
+        {"id": "S-020-a", "input": {"class": "repo_b_stale"}, "expect": {"verdict": "ALERT"}},
+        {"id": "S-020-b", "input": {"class": "window_missed"}, "expect": {"verdict": "ALERT"}},
+        {"id": "S-020-c", "input": {"class": "tz_mixed"}, "expect": {"verdict": "ALERT"}},
+        {"id": "S-020-d", "input": {"class": "repo_b_unreadable"}, "expect": {"verdict": "ALERT"}}
+      ]
+    },
+    {
+      "id": "S-030",
+      "when": {"class": {"in": ["health_probes_process", "restart_loop", "service_down", "backup_truncated", "block_corrupt", "job_order_inverted", "restore_mismatch", "repo_unreadable", "no_snapshot", "source_unreadable", "registry_tampered", "trace_unreadable", "instance_unreadable"]}},
+      "then": {"verdict": "FAILED"},
+      "rationale": "A route that does not answer, a restore that does not reproduce the source, a chain in the wrong order, or evidence that cannot be read: the operation did not hold.",
+      "tests": [
+        {"id": "S-030-a", "input": {"class": "block_corrupt"}, "expect": {"verdict": "FAILED"}},
+        {"id": "S-030-b", "input": {"class": "health_probes_process"}, "expect": {"verdict": "FAILED"}},
+        {"id": "S-030-c", "input": {"class": "registry_tampered"}, "expect": {"verdict": "FAILED"}}
+      ]
+    },
+    {
+      "id": "S-999",
+      "when": {},
+      "then": {"verdict": "FAILED"},
+      "rationale": "A class that no rule above lists is a defect of this file; until it is classified it is treated as a failure, never as OK.",
+      "tests": [
+        {"id": "S-999-a", "input": {"class": "something_new"}, "expect": {"verdict": "FAILED"}}
+      ]
+    }
+  ]
+}
