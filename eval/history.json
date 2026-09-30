@@ -1,0 +1,781 @@
+{
+  "about": "Every evaluation run of proof pack v2.0, in order, as measured. All figures are internal consistency on synthetic data: the generator of the faults and the rules that find them have the same author. The blind run is appended by eval/score.py --suite blind and is made by a different hand, once (eval/BLIND_PROTOCOL.md).",
+  "corrections": [
+    {
+      "fix": "rules/health.json 2026.09.30-2: rule H-020 decides on the failing beats at which the healthcheck said healthy",
+      "found_by": "stress suite, first run",
+      "id": "C-1",
+      "status": "not blind",
+      "what": "health_probes_process reported as service_down when one restart fell in the middle of a long silent failure",
+      "when": "2026-09-30"
+    },
+    {
+      "fix": "rules/alerts.json 2026.09.30-2 (rule A-035, class repo_b_unreadable) and rules/severity.json 2026.09.30-2; the fact is computed in lab/heartbeat.py",
+      "found_by": "writing tests/test_heartbeat.py, not a suite run",
+      "id": "C-2",
+      "status": "not blind; no suite plants this case, so no suite figure changed",
+      "what": "a secondary repository whose newest snapshot could not be read produced no finding: the run could end OK",
+      "when": "2026-09-30"
+    },
+    {
+      "fix": "tests/test_never_event.py, one more damage; the pack already refused it",
+      "found_by": "re-reading a commit message against the tree",
+      "id": "C-3",
+      "status": "test added, no code change",
+      "what": "a file listed under another name was named among the never-event attempts but was not tried",
+      "when": "2026-09-30"
+    },
+    {
+      "fix": "eval/score.py: labels checked before anything runs; references asked only for the parts in scope; a part in scope that no reference can read is not vouched for",
+      "found_by": "writing tests for the hand-written instances of the blind run",
+      "id": "C-4",
+      "status": "scorer change made after the holdout run; the lab and the rule files did not change. The development suite was scored again and eval/results.json came out byte-identical; the holdout suite was not run again",
+      "what": "the scorer stopped with an error on an instance whose scope leaves a part out, and on a hand-written fault of a class the generator does not plant",
+      "when": "2026-09-30"
+    }
+  ],
+  "runs": [
+    {
+      "commit": "uncommitted working tree (the first commit of the pack was made later the same day)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "backup_truncated": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "block_corrupt": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "health_probes_process": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "job_order_inverted": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "repo_b_stale": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "restart_loop": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "retention_deletes_only_valid": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_duplicate_shadow": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_missing_service": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "tz_mixed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "window_missed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          }
+        },
+        "clean": 72,
+        "detected": 168,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 1,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 168,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 168,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 42,
+        "restore_lists_planted": 42,
+        "seed": 20260930,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "first run of the development suite. The clock was read before the run. The printed table is the same as the one of the later run recorded below, so the metrics object is that one. Development data: inspected by the author.",
+      "rules": {
+        "alerts": "2026.09.30-1",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-1",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-1"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20260930,
+      "suite": "dev",
+      "when": "2026-09-30T15:18:54Z"
+    },
+    {
+      "commit": "uncommitted working tree (the first commit of the pack was made later the same day)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "backup_truncated": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "block_corrupt": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "health_probes_process": {
+            "detected": 36,
+            "localised": 36,
+            "planted": 37
+          },
+          "job_order_inverted": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          },
+          "repo_b_stale": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "restart_loop": {
+            "detected": 33,
+            "localised": 33,
+            "planted": 33
+          },
+          "retention_deletes_only_valid": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "route_duplicate_shadow": {
+            "detected": 24,
+            "localised": 24,
+            "planted": 24
+          },
+          "route_missing_service": {
+            "detected": 27,
+            "localised": 27,
+            "planted": 27
+          },
+          "tz_mixed": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "window_missed": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          }
+        },
+        "clean": 72,
+        "detected": 335,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 2,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 335,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 336,
+        "recall_detected": 0.997,
+        "recall_localised": 0.997,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 85,
+        "restore_lists_planted": 85,
+        "seed": 20261002,
+        "spurious_by_class": {
+          "service_down": 1
+        },
+        "spurious_findings": 1,
+        "styles": [
+          "flow",
+          "double-quoted",
+          "comments",
+          "key-order",
+          "indent-4",
+          "crlf",
+          "yml-ext",
+          "host-case",
+          "prefix-slash",
+          "entrypoints-list"
+        ],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "first run of the stress suite (diagnostic: two faults per instance, perturbed YAML writing styles). One miss: in instance stress-0038 a health_probes_process fault was reported as service_down (1 of 37 not detected, 1 spurious finding). Only the summary lines and the differing class were kept from this run; the other per-class rows are those of the later run, which the summary totals are consistent with.",
+      "rules": {
+        "alerts": "2026.09.30-1",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-1",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-1"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20261002,
+      "suite": "stress",
+      "when": "2026-09-30T15:21:00Z"
+    },
+    {
+      "commit": "uncommitted working tree (the first commit of the pack was made later the same day)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "backup_truncated": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "block_corrupt": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "health_probes_process": {
+            "detected": 37,
+            "localised": 37,
+            "planted": 37
+          },
+          "job_order_inverted": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          },
+          "repo_b_stale": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "restart_loop": {
+            "detected": 33,
+            "localised": 33,
+            "planted": 33
+          },
+          "retention_deletes_only_valid": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "route_duplicate_shadow": {
+            "detected": 24,
+            "localised": 24,
+            "planted": 24
+          },
+          "route_missing_service": {
+            "detected": 27,
+            "localised": 27,
+            "planted": 27
+          },
+          "tz_mixed": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "window_missed": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          }
+        },
+        "clean": 72,
+        "detected": 336,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 2,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 336,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 336,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 85,
+        "restore_lists_planted": 85,
+        "seed": 20261002,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [
+          "flow",
+          "double-quoted",
+          "comments",
+          "key-order",
+          "indent-4",
+          "crlf",
+          "yml-ext",
+          "host-case",
+          "prefix-slash",
+          "entrypoints-list"
+        ],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "after the fix: rules/health.json version 2026.09.30-2 (rule H-020 counts the failing beats at which the declared healthcheck said healthy, so one restart inside a long silent failure no longer turns it into service_down). No longer a first run: the rule was changed after looking at the miss. The time is that of the returned result.",
+      "rules": {
+        "alerts": "2026.09.30-1",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-2",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-1"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20261002,
+      "suite": "stress",
+      "when": "2026-09-30T15:24:51Z"
+    },
+    {
+      "commit": "uncommitted working tree (the first commit of the pack was made later the same day)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "backup_truncated": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "block_corrupt": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "health_probes_process": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "job_order_inverted": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "repo_b_stale": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "restart_loop": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "retention_deletes_only_valid": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_duplicate_shadow": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_missing_service": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "tz_mixed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "window_missed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          }
+        },
+        "clean": 72,
+        "detected": 168,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 1,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 168,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 168,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 42,
+        "restore_lists_planted": 42,
+        "seed": 20260930,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "re-run with the rule files as frozen (alerts and severity 2026.09.30-2 after correction C-2 below). The clock was read after the run. Unchanged.",
+      "rules": {
+        "alerts": "2026.09.30-2",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-2",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-2"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20260930,
+      "suite": "dev",
+      "when": "2026-09-30T16:02:59Z"
+    },
+    {
+      "commit": "uncommitted working tree (the first commit of the pack was made later the same day)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "backup_truncated": {
+            "detected": 31,
+            "localised": 31,
+            "planted": 31
+          },
+          "block_corrupt": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "health_probes_process": {
+            "detected": 37,
+            "localised": 37,
+            "planted": 37
+          },
+          "job_order_inverted": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          },
+          "repo_b_stale": {
+            "detected": 26,
+            "localised": 26,
+            "planted": 26
+          },
+          "restart_loop": {
+            "detected": 33,
+            "localised": 33,
+            "planted": 33
+          },
+          "retention_deletes_only_valid": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "route_duplicate_shadow": {
+            "detected": 24,
+            "localised": 24,
+            "planted": 24
+          },
+          "route_missing_service": {
+            "detected": 27,
+            "localised": 27,
+            "planted": 27
+          },
+          "tz_mixed": {
+            "detected": 25,
+            "localised": 25,
+            "planted": 25
+          },
+          "window_missed": {
+            "detected": 28,
+            "localised": 28,
+            "planted": 28
+          }
+        },
+        "clean": 72,
+        "detected": 336,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 2,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 336,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 336,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 85,
+        "restore_lists_planted": 85,
+        "seed": 20261002,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [
+          "flow",
+          "double-quoted",
+          "comments",
+          "key-order",
+          "indent-4",
+          "crlf",
+          "yml-ext",
+          "host-case",
+          "prefix-slash",
+          "entrypoints-list"
+        ],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "re-run with the rule files as frozen. The clock was read after the run. Not a first run.",
+      "rules": {
+        "alerts": "2026.09.30-2",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-2",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-2"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20261002,
+      "suite": "stress",
+      "when": "2026-09-30T16:04:06Z"
+    },
+    {
+      "commit": "97aa20f5384414830b8a9f80ded84613f6567d39",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "backup_truncated": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "block_corrupt": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "health_probes_process": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "job_order_inverted": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "repo_b_stale": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "restart_loop": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "retention_deletes_only_valid": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_duplicate_shadow": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_missing_service": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "tz_mixed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "window_missed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          }
+        },
+        "clean": 72,
+        "detected": 168,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 1,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 168,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 168,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 42,
+        "restore_lists_planted": 42,
+        "seed": 20261001,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "the only run of the holdout suite, on committed code. Aggregates only: the generated corpus was removed by the scorer and no instance was inspected. The clock was read before the run (it ended at 2026-09-30T16:13:26Z).",
+      "rules": {
+        "alerts": "2026.09.30-2",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-2",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-2"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20261001,
+      "suite": "holdout",
+      "when": "2026-09-30T16:12:21Z"
+    },
+    {
+      "commit": "working tree on top of 97aa20f5384414830b8a9f80ded84613f6567d39 (scorer change C-4, committed next)",
+      "metrics": {
+        "classes": {
+          "admin_on_public": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "backup_truncated": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "block_corrupt": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "health_probes_process": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "job_order_inverted": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "repo_b_stale": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "restart_loop": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "retention_deletes_only_valid": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_duplicate_shadow": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "route_missing_service": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "tz_mixed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          },
+          "window_missed": {
+            "detected": 14,
+            "localised": 14,
+            "planted": 14
+          }
+        },
+        "clean": 72,
+        "detected": 168,
+        "false_alarms_on_clean": 0,
+        "faults_per_instance": 1,
+        "gold_reference_disagreements": 0,
+        "handwritten": 0,
+        "instances": 240,
+        "localised": 168,
+        "never_event_admin_public": 0,
+        "never_event_restore": 0,
+        "planted_faults": 168,
+        "recall_detected": 1.0,
+        "recall_localised": 1.0,
+        "reference_covered_instances": 240,
+        "restore_lists_exact": 42,
+        "restore_lists_planted": 42,
+        "seed": 20260930,
+        "spurious_by_class": {},
+        "spurious_findings": 0,
+        "styles": [],
+        "verdict_accuracy": 1.0,
+        "verdict_correct": 240
+      },
+      "note": "re-run after the scorer change C-4. The clock was read after the run. eval/results.json byte-identical to the file before the change.",
+      "rules": {
+        "alerts": "2026.09.30-2",
+        "backup_policy": "2026.09.30-1",
+        "health": "2026.09.30-2",
+        "route_lint": "2026.09.30-1",
+        "severity": "2026.09.30-2"
+      },
+      "runner": "author of the pack (AI agent, model claude-opus-5-5)",
+      "seed": 20260930,
+      "suite": "dev",
+      "when": "2026-09-30T16:20:04Z"
+    }
+  ]
+}
