@@ -1,7 +1,7 @@
 {
-  "version": "2026.09.30-1",
+  "version": "2026.09.30-2",
   "kind": "backup_policy",
-  "note": "Three ordered sections. 'chain_rules' decide on the order of the nightly chain (policy and trace). 'drill_rules' classify a restore drill that did not hold; they never turn a failed drill into a success - success is computed from the evidence, not decided here. 'retention_rules' decide whether superseded snapshots may be moved out of the way. First match wins.",
+  "note": "Three ordered sections. 'chain_rules' decide on the order of the nightly chain (policy and trace). 'drill_rules' classify a restore drill that did not hold; they never turn a failed drill into a success - success is computed from the evidence, not decided here. Their facts come from the restore of the snapshot and from the complete read of the whole repository (every index entry, every block of the pack, every snapshot manifest). 'retention_rules' decide whether superseded snapshots may be moved out of the way. First match wins.",
   "params": {
     "block_size": 1024
   },
@@ -30,9 +30,10 @@
       "id": "B-000",
       "when": {"repo_readable": false},
       "then": {"class": "repo_unreadable"},
-      "rationale": "The index or the snapshot cannot be read: nothing can be asserted about the repository.",
+      "rationale": "A part of the repository cannot be read: the index (missing, empty, cut short, not JSON, a repeated key), the pack, the snapshots folder, or any snapshot manifest - not only the one restored (lab/backup.py, inspect, reads them all). Nothing can be asserted about the repository.",
       "tests": [
-        {"id": "B-000-a", "input": {"ok": false, "repo_readable": false, "has_snapshot": false}, "expect": {"class": "repo_unreadable"}}
+        {"id": "B-000-a", "input": {"ok": false, "repo_readable": false, "has_snapshot": false}, "expect": {"class": "repo_unreadable"}},
+        {"id": "B-000-b", "input": {"ok": false, "repo_readable": false, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 0, "truncated": false, "mismatched": 0}, "expect": {"class": "repo_unreadable"}}
       ]
     },
     {

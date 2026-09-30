@@ -13,7 +13,7 @@ import datetime as dt
 
 from lab import findings as F
 from lab import rules_engine, timeutil
-from lab.backup import POLICY_FILE, Repo, RepoError
+from lab.backup import POLICY_FILE, Repo, RepoError, inspect
 from lab.sim import FILE as TRACE_FILE
 
 RULES = "alerts.json"
@@ -104,23 +104,38 @@ def evaluate(policy: dict, jobs: list[dict], as_of: dt.datetime) -> dict:
             "catch_up": catch_up}
 
 
-def secondary(policy: dict, repo_a: Repo, repo_b: Repo, jobs: list[dict], as_of: dt.datetime) -> dict:
-    """Is the secondary repository as fresh as the primary? Reads the repositories, not the job log."""
+def secondary(policy: dict, repo_a: Repo, repo_b: Repo, jobs: list[dict], as_of: dt.datetime,
+              inspection_b: dict | None = None) -> dict:
+    """Is the secondary repository readable, and as fresh as the primary? Reads the repositories, not the job log.
+
+    "Readable" is the complete read of ``backup.inspect``: every index entry, every block of the
+    pack, every snapshot manifest. Reading the newest manifest alone (its ``created``) said nothing
+    about an index cut in half (finding T17). A part that cannot be read or verified makes the
+    secondary unreadable, with its location; its age is then not judged.
+    """
     rules = rules_engine.load(RULES)
     max_lag = policy["repos"]["b"].get("max_lag_hours") or int(rules.params["default_max_lag_hours"])
     out: dict = {"max_lag_hours": max_lag, "as_of": timeutil.fmt(as_of), "finding": None}
-    ids_a, ids_b = repo_a.snapshot_ids(), repo_b.snapshot_ids()
+    inspection_b = inspection_b if inspection_b is not None else inspect(repo_b)
+    ids_b = inspection_b["snapshots"]["listed"]
+    try:
+        ids_a = repo_a.snapshot_ids()
+    except RepoError as exc:
+        ids_a = []
+        out["primary_unreadable"] = str(exc)      # the restore drill reports the primary; no lag is computed here
     newest_a = newest_b = None
-    facts: dict = {"secondary_readable": True, "secondary_has_snapshots": bool(ids_b)}
+    readable = not inspection_b["problems"]
+    facts: dict = {"secondary_readable": readable, "secondary_has_snapshots": bool(ids_b)}
     try:
         newest_a = repo_a.created(ids_a[-1]) if ids_a else None
     except RepoError as exc:
         out["primary_unreadable"] = str(exc)      # the restore drill reports the primary; no lag is computed here
-    try:
-        newest_b = repo_b.created(ids_b[-1]) if ids_b else None
-    except RepoError as exc:
-        out["unreadable"] = str(exc)              # age unknown: reported by rule, never assumed fresh
-        facts["secondary_readable"] = False
+    if not readable:
+        # age unknown and copy not vouched for: reported by rule with every location, never assumed fresh
+        where = policy["repos"]["b"]["path"]
+        out["unreadable"] = [dict(p, location=f"{where}/{p['location']}") for p in inspection_b["problems"]]
+    elif inspection_b["snapshots"]["newest_created"] is not None:
+        newest_b = timeutil.parse_utc(inspection_b["snapshots"]["newest_created"])
     out.update({"a_newest": ids_a[-1] if ids_a else None, "b_newest": ids_b[-1] if ids_b else None})
     if newest_a is not None and newest_b is not None:
         lag_h = (newest_a - newest_b).total_seconds() / 3600
@@ -134,8 +149,9 @@ def secondary(policy: dict, repo_a: Repo, repo_b: Repo, jobs: list[dict], as_of:
     then, rid = rules.decide("repo_rules", facts)
     if rid:
         detail = {k: v for k, v in out.items() if k != "finding"}
+        first = out["unreadable"][0] if out.get("unreadable") else None
         state = ("newest snapshot of the secondary repository" if newest_b
-                 else "newest snapshot of the secondary repository cannot be read" if "unreadable" in out
+                 else f"secondary repository cannot be read completely: {first['location']} ({first['kind']})" if first
                  else "no snapshot in the secondary repository")
         detail["timeline"] = [[timeutil.fmt(newest_b) if newest_b else out["as_of"], "repo_b", state],
                               [out["as_of"], "audit", f"job log claims {claims or ['nothing']} for backup_b; repository read instead"]]

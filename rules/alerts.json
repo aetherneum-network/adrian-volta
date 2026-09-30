@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.30-2",
+  "version": "2026.09.30-3",
   "kind": "alerts",
   "note": "Four ordered sections, each decides on one subject: the schedule, the job timestamps, the nightly windows, the secondary repository. First match wins. 'windows: abstain' means the window evaluation is not performed: a schedule in local time or a timestamp without a zone is not converted by guesswork.",
   "params": {
@@ -73,17 +73,18 @@
       "id": "A-035",
       "when": {"secondary_readable": false},
       "then": {"class": "repo_b_unreadable"},
-      "rationale": "A secondary repository whose newest snapshot cannot be read has an unknown age. Unknown is reported, it is not treated as fresh.",
+      "rationale": "The secondary repository is read completely (lab/backup.py, inspect): the index to its last byte, every block the index lists against its address in the pack, every snapshot manifest, every listed file rebuilt to its recorded SHA-256. If any part cannot be read or does not verify - an index cut short, empty, not JSON or with a repeated key; a pack shorter than its index, or missing; a block that does not hash; a manifest that cannot be read or lists blocks the index does not have - the secondary is not readable: its content is not vouched for and its age is unknown. Unknown is reported with its location, it is not treated as fresh. Up to version 2026.09.30-2 the fact came from the created field of the newest manifest alone, so an index cut in half still counted as readable (finding T17).",
       "tests": [
         {"id": "A-035-a", "input": {"secondary_readable": false}, "expect": {"class": "repo_b_unreadable"}},
-        {"id": "A-035-b", "input": {"secondary_readable": false, "secondary_has_snapshots": true, "lag_exceeds_max": false}, "expect": {"class": "repo_b_unreadable"}}
+        {"id": "A-035-b", "input": {"secondary_readable": false, "secondary_has_snapshots": true, "lag_exceeds_max": false}, "expect": {"class": "repo_b_unreadable"}},
+        {"id": "A-035-c", "input": {"secondary_readable": false, "secondary_has_snapshots": false}, "expect": {"class": "repo_b_unreadable"}}
       ]
     },
     {
       "id": "A-040",
       "when": {"secondary_has_snapshots": false},
       "then": {"class": "repo_b_stale"},
-      "rationale": "A secondary repository without any snapshot is not a second copy.",
+      "rationale": "A secondary repository without any snapshot - absent altogether, or read completely and holding no manifest - is not a second copy. After A-035 on purpose: a secondary whose index or snapshots folder cannot be read is unreadable, not merely empty.",
       "tests": [
         {"id": "A-040-a", "input": {"secondary_readable": true, "secondary_has_snapshots": false}, "expect": {"class": "repo_b_stale"}}
       ]

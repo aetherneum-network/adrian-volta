@@ -3,6 +3,73 @@
 Nothing is deleted or rewritten in this repository: a change is a new entry, a new version of a
 rule file, a new commit. Dates are UTC.
 
+## v2.0.1-freeze - 2026-09-30
+
+Fix of finding **T17**. Source: the evaluator's blind run of 2026-09-30 on `v2.0.0-freeze` (seed
+`20261011`, runner "evaluator (Claude Opus 5.5), not the builder"), recorded verbatim in
+`eval/history.json` in its own commit before any fix. Frozen with the annotated tag
+`v2.0.1-freeze`. The blind figures of `v2.0.0-freeze` stay as recorded; `v2.0.1-freeze` has not
+been measured blind. Written by the synthetic alumnus (an AI agent) through Claude Opus 5.5.
+
+### T17 - an OK that said nothing about the secondary repository
+
+- **What the blind run saw.** Hand-written instance hand-0007: the index of the secondary
+  repository cut halfway through (804 bytes). The lab answered verdict OK, exit code 0, "RUN OK",
+  drill `ok`; the gold label is `repo_b_unreadable`, ALERT. That one instance is the missed fault
+  (localised 342/343), the wrong verdict (249/250) and the `never_event_restore` of 1 in that run:
+  the three figures are one defect.
+- **Cause.** `lab/heartbeat.py` called the secondary readable when the `created` field of its
+  newest manifest could be read (`Repo.created` in `lab/backup.py`); nothing read its index or its
+  pack. `lab/run.py` drilled the primary only and reported that drill as the drill result, so an
+  `ok` said nothing about the secondary. Rule A-035 described the fact in the same narrow way.
+- **Fix, code.** `lab/backup.py`, `inspect`: a complete read of a repository - the index parsed
+  to its end, every block it lists found inside the pack and hashed to its address, every snapshot
+  manifest read, every listed file rebuilt to its size and SHA-256; each problem carries its
+  location. `lab/drill.py`: a `DrillResult` is ok only with that complete read of its repository;
+  `ScopeResult` makes `drill.result` `ok` only when the primary drill held *and* the secondary was
+  read completely and verified. `drill.primary_result` keeps the primary alone,
+  `drill.repositories` says per repository what was read and verified, and `drill.unverified`
+  lists every part that was not, with its location. The console prints one line per repository;
+  the postmortem too. `lab/heartbeat.py`: `secondary_readable` is the complete read; its problems
+  are listed with their location and no age is computed from an unread repository. `lab/run.py`:
+  a structural guard (`RUN-050`) would name the unverified repository if a drill that is not ok
+  ever ended without a finding.
+- **Silent fallbacks removed on the way.** `lab/restore.py` replaced a pack that could not be read
+  by an empty one and then reported missing blocks: now `pack_unreadable`. `lab/fsx.py`
+  `walk_files` skipped a folder that could not be listed: now it raises; `Repo.snapshot_ids` turns
+  that into "cannot be listed", never "no snapshot", and `lab/routes.py` into `route_unreadable`.
+  Repository JSON with a repeated key was read as "last one wins": now it is unreadable. The
+  primary is read completely too: an older manifest that cannot be read, or a corrupt block used
+  only by an older snapshot, now fails the drill.
+- **Fix, rules.** `rules/alerts.json` `2026.09.30-3`: A-035 states the complete read, new inline
+  test A-035-c; the rationale of A-040 says absent or empty. `rules/backup_policy.json`
+  `2026.09.30-2`: B-000 covers any part of the repository, new inline test B-000-b; the note says
+  where the drill facts come from. No class, verdict or order changed.
+- **Tests.** `tests/test_complete_read.py`: hand-0007 byte for byte (`tests/data/hand-0007`, the
+  two packs stored with a `.txt` suffix so that the scanner reads them), eleven damages of the
+  secondary (index cut in half, empty, with a repeated key, not UTF-8; pack cut short, missing;
+  index entries beyond the pack; an entry missing that an older manifest needs; an older manifest
+  cut short; a corrupt block; a snapshots path that is not a folder), a secondary missing
+  altogether and one that is empty, three cases on the primary, and the fallbacks above.
+  `tests/test_never_event.py`: a drill without the complete read is not ok. On the code of
+  `v2.0.0-freeze` 18 of the 19 new tests fail - hand-0007 audits OK with exit 0, and ten of the
+  eleven damages of the secondary audit OK.
+- **Scorer gate.** `eval/score.py` refused any blind run once one was recorded in the repository,
+  which would have refused the blind run of this tag. It now refuses a second blind run of the
+  same commit.
+- **Measured again, not blind:** the development suite (seed `20260930`) and the stress suite
+  (seed `20261002`) on the fixed code, recorded in `eval/history.json`; the holdout suite was not
+  run again. Scenario S04: only the rule-versions line of its expected postmortem changed
+  (re-pinned). New rebuild digest in `reports/REBUILD.sha256`.
+
+### Not done, not verified
+
+- The blind run of `v2.0.1-freeze`: to be made once, by a different hand, with a new seed and new
+  hand-written instances (`eval/BLIND_PROTOCOL.md`). Seed `20261011` and the ten hand-written
+  instances of the first run are no longer blind.
+- An unexpected exception in `python -m lab.run` ends with Python's exit code 1, the number of
+  ALERT (no report is written and "RUN OK" is not printed). Not changed here: `[TO CONFIRM]`.
+
 ## v2.0.0-freeze - 2026-09-30
 
 First proof pack. Frozen with the annotated tag `v2.0.0-freeze` before the blind run. Written by

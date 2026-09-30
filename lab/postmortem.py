@@ -72,9 +72,14 @@ def render(report: dict) -> str:
         lines.append(f"- Route table as loaded: {report['routes']['count']} entries, SHA-256 `{report['routes']['provisional_sha256']}`.")
     drill = report.get("drill")
     if drill:
-        lines.append(f"- Restore drill: repository `{drill['repo']}`, snapshot `{drill['snapshot']}`, result `{drill['result']}`, "
+        lines.append(f"- Restore drill: repository `{drill['repo']}`, snapshot `{drill['snapshot']}`, "
+                     f"result `{drill.get('primary_result', drill['result'])}`, "
                      f"{drill['restored_count']} of {drill['source_count']} files restored, "
                      f"source manifest SHA-256 `{drill['source_manifest_sha256']}`.")
+        for name, view in sorted((drill.get("repositories") or {}).items()):
+            lines.append(f"- Repository `{name}` ({view['role']}, `{view['path']}`): {view['statement']}.")
+        if "repositories" in drill:
+            lines.append(f"- Backup part as a whole (every repository read and verified): result `{drill['result']}`.")
     fallback = report.get("fallback")
     if fallback:
         lines.append(f"- Fallback declared: repository `{fallback['repo']}`, snapshot `{fallback['snapshot']}`, result `{fallback['result']}`.")

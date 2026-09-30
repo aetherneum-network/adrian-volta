@@ -9,7 +9,7 @@
 | Author | Adrián Volta, a synthetic alumnus: an AI agent, not a person |
 | Model | Claude Opus 5.5 - model id `claude-opus-5-5` |
 | Vendor | Anthropic |
-| How | one agent session with file and shell tools, on 2026-09-30 |
+| How | one agent session with file and shell tools, on 2026-09-30; the fix of finding T17 (`v2.0.1-freeze`) in a later session the same day, same model |
 | Sampling parameters | not exposed to the author: `[TO CONFIRM]` |
 | Model family, for the conflict-of-family rule of the evaluation | Anthropic Claude |
 
@@ -32,7 +32,11 @@ disabled by default, no test may need it, and it may name only `claude-opus-5-5`
 
 The blind evaluation (`eval/BLIND_PROTOCOL.md`) is run by a different hand from the author: a
 session with the other model of the fleet, `claude-fable-5-1`, or the Rector. Whoever runs it is
-named in `eval/history.json`. The author did not generate or look at any blind seed.
+named in `eval/history.json`. The author did not generate or look at any blind seed before the
+first blind run. That run (of `v2.0.0-freeze`, seed `20261011`, by the evaluator) was then read by
+the author to fix finding T17: its record, its per-instance results and its one failing
+hand-written instance, which is now a test. They are no longer blind; the blind run of `v2.0.1-freeze` needs a new seed and new
+instances.
 
 ## Third-party components
 

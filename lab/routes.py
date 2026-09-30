@@ -124,7 +124,10 @@ def load(instance_dir) -> tuple[list[Router], list[tuple[str, str]], list[str]]:
     """Return ``(routers, problems, files)``; ``problems`` is a list of ``(file, reason)``."""
     routers: list[Router] = []
     problems: list[tuple[str, str]] = []
-    files = route_files(instance_dir)
+    try:
+        files = route_files(instance_dir)
+    except OSError as exc:          # a folder that cannot be listed is said, never read as "no route file"
+        return routers, [(ROUTES_DIR, f"{type(exc).__name__}: a folder under {ROUTES_DIR} cannot be listed")], []
     for rel in files:
         doc, err = yamlio.load_file(fsx.join(instance_dir, rel))
         if err:

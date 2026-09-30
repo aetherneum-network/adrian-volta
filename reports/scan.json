@@ -12,7 +12,7 @@
     "avatar.jpg"
   ],
   "declaration_signed_by": "[TO CONFIRM]",
-  "files_scanned": 198,
+  "files_scanned": 218,
   "findings": [],
   "limits": "pattern scan only; it does not prove the absence of every possible leak",
   "result": "clean",

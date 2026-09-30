@@ -77,13 +77,21 @@ def size(path) -> int:
     return os.path.getsize(ext(path))
 
 
+def _listing_failed(exc: OSError) -> None:
+    raise exc
+
+
 def walk_files(root) -> list[str]:
-    """Sorted POSIX relative paths of every file under ``root`` (empty list if it is missing)."""
+    """Sorted POSIX relative paths of every file under ``root`` (empty list if it is missing).
+
+    A folder that exists but cannot be listed raises ``OSError``: it is never skipped in silence
+    (``os.walk`` alone drops such a folder and its files without a word).
+    """
     base = ext(root)
     if not os.path.isdir(base):
         return []
     out: list[str] = []
-    for dirpath, dirnames, filenames in os.walk(base):
+    for dirpath, dirnames, filenames in os.walk(base, onerror=_listing_failed):
         dirnames.sort()
         rel_dir = dirpath[len(base):].strip("/" + _BS).replace(_BS, "/")
         for name in filenames:

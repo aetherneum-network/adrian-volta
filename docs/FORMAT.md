@@ -143,6 +143,18 @@ repo_a/superseded/<id>.json          manifests moved by retention (never deleted
 The easiest way to write a repository by hand is to let the pack do it on a source tree
 (`lab.backup.backup(source_dir, repo_dir, created)`), then damage it with a hex editor.
 
+**What an audit reads (since `v2.0.1-freeze`, finding T17).** Both repositories are read
+completely (`lab/backup.py`, `inspect`): `index.json` to its end - an index that is empty, cut
+short, not JSON, not UTF-8 or with a repeated key is unreadable; every block it lists must lie
+inside `pack.bin` and hash to its address; every manifest under `snapshots/` is read, and every
+file it lists is rebuilt to its size and SHA-256 (`superseded/` is not read). In the report,
+`drill.result` is `ok` only when the restore of the primary held *and* the secondary was read
+completely and verified; `drill.primary_result` is the primary alone; `drill.repositories.a` and
+`.b` say what was read and verified; `drill.unverified` lists every part that was not, with its
+location in the instance (`repo_b/index.json`, `repo_b/pack.bin`, `repo_b/snapshots/<id>.json`).
+A secondary that is absent or holds no snapshot is `repo_b_stale` (it is not a second copy); one
+with any part that cannot be read or verified is `repo_b_unreadable`, and its age is not judged.
+
 ### `drills.jsonl`
 
 Append-only registry: each line carries `prev` (the `hash` of the line before, or 64 zeros) and
@@ -177,6 +189,7 @@ The verdict of a run is the most severe one among its findings (`rules/severity.
 | `health_probes_process` | `topology.yaml` | `[]` | `[service]` | `[]` |
 | `restart_loop` | `trace.jsonl` | `[]` | `[service]` | `[]` |
 | `repo_b_stale` | the path of repository b | `[]` | `[newest snapshot id of b]`, or `[null]` when b has no snapshot | `[]` |
+| `repo_b_unreadable` | the path of repository b | `[]` | `null` (the lab names the newest snapshot id listed in b, if any) | `[]` |
 | `backup_truncated`, `block_corrupt` | the path of repository a | `[]` | `[newest snapshot id of a]` | every file that differs from the source after a restore, sorted |
 | `job_order_inverted` | `policy/backup.yaml` (item `chain`) or `trace.jsonl` (item = run id) | `[]` | `["chain"]` or `[run id]` | the files that differ (usually the export) |
 | `window_missed` | `trace.jsonl` | `[]` | `[date of the first missed window, YYYY-MM-DD]` | `[]` |

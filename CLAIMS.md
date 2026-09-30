@@ -21,7 +21,7 @@ data (`SYNTHETIC.md`). Nothing below is evidence about a real system.
 |---|---|---|---|---|
 | A1 | A service is exposed by adding one route file. A router that points to a missing backend, and a forgotten copy that shadows a live route, block the table. | S01, S02 | `tests/test_routes_lint.py`, `tests/test_yaml_styles.py` | `rules/route_lint.json` |
 | A2 | An admin service never becomes reachable from a public entrypoint, by router or by network: the table is refused and gets no accepted digest. | S03 (negative) | `tests/test_routes_lint.py`, `tests/test_references.py` | `rules/route_lint.json` |
-| A3 | Backup to two repositories with restore drills. A restore is successful only when every restored file has the SHA-256 of the source manifest, no file is missing and none is extra. A stale or unreadable secondary is an alert. Retention never supersedes the only snapshot with a verified drill. | S05, S06, S07, S10 (negative) | `tests/test_never_event.py`, `tests/test_roundtrip.py`, `tests/test_backup_store.py`, `tests/test_fsx_jsonio.py` | `rules/backup_policy.json`, `rules/alerts.json` |
+| A3 | Backup to two repositories with restore drills. A restore is successful only when every restored file has the SHA-256 of the source manifest, no file is missing and none is extra. A drill is ok only when both repositories were read completely and verified - every index entry, every block of the pack, every snapshot manifest - and the report says per repository what was verified (since `v2.0.1-freeze`, finding T17). A stale or unreadable secondary is an alert. Retention never supersedes the only snapshot with a verified drill. | S05, S06, S07, S10 (negative) | `tests/test_never_event.py`, `tests/test_complete_read.py`, `tests/test_roundtrip.py`, `tests/test_backup_store.py`, `tests/test_fsx_jsonio.py` | `rules/backup_policy.json`, `rules/alerts.json` |
 | A4 | Health is what the route answers, not what the process says. A route that fails while the declared healthcheck stays healthy is a finding; three restarts in ten minutes are a loop. | S04 | `tests/test_sim_probe.py` | `rules/health.json` |
 | A5 | The nightly chain runs in order and in UTC. A backup taken before the export, a missed window, a schedule in a local time zone and timestamps without a zone are reported; nothing is assumed about an instant that is not written. | S08, S09 | `tests/test_heartbeat.py` | `rules/alerts.json`, `rules/backup_policy.json` |
 | A6 | A postmortem is written from the findings: timeline, cause, what detected it, no names and no blame. The profile does not state this one; the plan of the pack added it. | S04 | `tests/test_postmortem.py` | `rules/severity.json` |
@@ -35,10 +35,16 @@ fault classes against gold labels (`eval/results.json`, `eval/history.json`).
 **The never-event.** A restore declared successful while even one file's hash differs from the
 source manifest. Attempts: `tests/test_never_event.py` (damage to the pack, to the index, to the
 snapshot listing, a snapshot forged to be consistent with itself, a source changed after the
-backup, stale files in the scratch folder, an edited registry, 120 seeded mutations), S06, S10,
+backup, stale files in the scratch folder, an edited registry, 120 seeded mutations),
+`tests/test_complete_read.py` (the instance of the blind run below, byte for byte, and the
+damages of the same family on either repository), S06, S10,
 and the counter `never_event_restore` of the scorer, which is judged by
 `corpus/reference_hashes.py` and not by the lab. Measured: 0 on the development, holdout and
-stress suites (2026-09-30). The second counter, `never_event_admin_public`, is judged by
+stress suites (2026-09-30). **1 in the blind run of `v2.0.0-freeze`** (2026-09-30, seed
+`20261011`, run by the evaluator): one hand-written instance whose secondary index was cut in
+half was audited OK with drill `ok` (finding T17). Fixed in `v2.0.1-freeze` (`CHANGELOG.md`); the
+fix has not been measured blind. The development and stress suites give 0 again on the fixed code;
+the holdout suite was not run again. The second counter, `never_event_admin_public`, is judged by
 `corpus/reference_reach.py`: 0 on the same suites.
 
 ## 2. The statements of the profile, one by one
@@ -79,7 +85,9 @@ text and is not taken here.
 
 1. **Same author.** The generator of the faults and the rules that find them were written by
    the same agent. Development and holdout figures are saturated and measure internal consistency
-   on synthetic data. The blind run (`eval/BLIND_PROTOCOL.md`) has not been made.
+   on synthetic data. The blind run of `v2.0.0-freeze` (`eval/BLIND_PROTOCOL.md`) found one
+   defect, T17: localised 342/343, verdict 249/250, `never_event_restore` 1, all three from one
+   instance. The blind run of `v2.0.1-freeze`, which carries the fix, has not been made.
 2. **No independent reference for four classes.** Missed window, mixed time zones, retention, and
    the policy-order variant of the inverted chain are checked against the fault plan only
    (`docs/FORMAT.md`, section 4).

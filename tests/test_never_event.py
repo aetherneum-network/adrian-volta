@@ -258,13 +258,18 @@ class DrillRefuses(Base):
         self.assertFalse(fsx.exists(self.path("outside.txt")))
 
     def test_ok_is_computed_from_the_evidence_and_cannot_be_passed_in(self):
+        read_whole = {"verified": True, "problems": []}          # the complete read of the repository (backup.inspect)
         good = dict(repo="a", snapshot="20260912T023110Z", as_of="2026-09-12T06:10:00Z", source_count=3, declared_count=3,
-                    restored_count=3, mismatched=(), problems=(), source_manifest_sha256="0" * 64)
+                    restored_count=3, mismatched=(), problems=(), source_manifest_sha256="0" * 64, inspection=read_whole)
         self.assertTrue(drill.DrillResult(**good).ok)
         for label, change in {"no snapshot": {"snapshot": None}, "empty source": {"source_count": 0, "declared_count": 0, "restored_count": 0},
                               "declared unknown": {"declared_count": None}, "declared differs": {"declared_count": 2},
                               "restored differs": {"restored_count": 2}, "a problem": {"problems": (("block_corrupt", "x"),)},
-                              "a mismatch": {"mismatched": (("x", "hash"),)}}.items():
+                              "a mismatch": {"mismatched": (("x", "hash"),)},
+                              "repository not read (T17)": {"inspection": None},
+                              "repository not verified (T17)": {"inspection": {"verified": False, "problems": []}},
+                              "a part unreadable (T17)": {"inspection": {"verified": True, "problems": [
+                                  {"kind": "index_unreadable", "location": "index.json", "note": "cut short"}]}}}.items():
             with self.subTest(case=label):
                 self.assertFalse(drill.DrillResult(**dict(good, **change)).ok)
                 self.assertEqual(drill.DrillResult(**dict(good, **change)).result, "failed")

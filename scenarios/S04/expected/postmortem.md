@@ -22,7 +22,7 @@
 ## Evidence
 
 - `health_probes_process` [FAILED] at `topology.yaml`, item `status`, rule `H-020`.
-- Rule files: `alerts` 2026.09.30-2, `backup_policy` 2026.09.30-1, `health` 2026.09.30-2, `route_lint` 2026.09.30-1, `severity` 2026.09.30-2.
+- Rule files: `alerts` 2026.09.30-3, `backup_policy` 2026.09.30-2, `health` 2026.09.30-2, `route_lint` 2026.09.30-1, `severity` 2026.09.30-2.
 - Route table as loaded: 4 entries, SHA-256 `45572f11d6437a6d4bcb5d44adf13c8580771dc68ea369560658a80ef029d67a`.
 
 ## What the checks did not see

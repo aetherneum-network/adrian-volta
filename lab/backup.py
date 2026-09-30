@@ -10,10 +10,13 @@ Repository layout (the same for the primary ``a`` and the secondary ``b``)::
 A block is addressed by the SHA-256 of its content, so an unchanged file costs nothing on the
 next night and a changed byte is visible as a wrong address. A snapshot is never overwritten.
 ``backup`` re-reads what it wrote before returning: a write that cannot be confirmed is a failed run.
+``inspect`` reads a repository completely - every index entry, every byte of the pack, every
+snapshot manifest - and returns each part it could not read or verify with its location.
 """
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 
 from lab import fsx, jsonio, rules_engine, timeutil, yamlio
@@ -32,6 +35,33 @@ class RepoError(Exception):
 
 class BackupError(Exception):
     """A backup could not be written and confirmed."""
+
+
+def _no_repeated_keys(pairs: list) -> dict:
+    keys = [k for k, _ in pairs]
+    if len(set(keys)) != len(keys):
+        repeated = sorted({k for k in keys if keys.count(k) > 1})[0]
+        raise ValueError(f"repeated key {repeated[:16]!r}: two values for one name, none is chosen")
+    return dict(pairs)
+
+
+def read_json_strict(path):
+    """Read one JSON file of a repository. A repeated key is an error, not "last one wins"."""
+    raw = fsx.read_bytes(path)
+    try:
+        return json.loads(raw.decode("utf-8"), object_pairs_hook=_no_repeated_keys)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"{exc.msg} (character {exc.pos} of {len(exc.doc)}; file of {len(raw)} bytes)") from None
+
+
+def _why(exc: Exception) -> str:
+    """The reason, without any path: reports stay free of host paths and identical across folders."""
+    if isinstance(exc, OSError):
+        return f"{type(exc).__name__}: {exc.strerror or 'cannot be read'}"
+    if isinstance(exc, UnicodeDecodeError):
+        return f"UnicodeDecodeError: {exc.reason} at byte {exc.start}"
+    text = str(exc)
+    return f"{type(exc).__name__}: {text}" if text else type(exc).__name__
 
 
 def safe_rel(path) -> bool:
@@ -118,29 +148,37 @@ class Repo:
         return fsx.isfile(self.index_path)
 
     def load_index(self) -> dict:
+        """The whole index, or ``RepoError``: missing, empty, truncated, not JSON, a repeated key or a malformed entry."""
         try:
-            index = jsonio.read(self.index_path)
+            index = read_json_strict(self.index_path)
         except (OSError, ValueError) as exc:
-            raise RepoError(f"index unreadable: {type(exc).__name__}") from None
+            raise RepoError(f"index unreadable: {_why(exc)}") from None
         blocks = index.get("blocks") if isinstance(index, dict) else None
         if not isinstance(blocks, dict) or as_int(index.get("block_size")) is None:
-            raise RepoError("index malformed")
+            raise RepoError("index malformed: 'blocks' must be a mapping and 'block_size' an integer")
         for sha, loc in blocks.items():
             if (not _RE_SHA.match(str(sha)) or not isinstance(loc, list) or len(loc) != 2
                     or any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in loc)):
-                raise RepoError("index malformed")
+                raise RepoError(f"index malformed: entry {str(sha)[:16]!r} is not <sha256>: [offset, length]")
         return index
 
     def snapshot_ids(self) -> list[str]:
-        names = [rel[:-5] for rel in fsx.walk_files(fsx.join(self.path, "snapshots"))
-                 if "/" not in rel and rel.endswith(".json")]
+        """Snapshot ids in order. A snapshots folder that cannot be listed is ``RepoError``, never "no snapshot"."""
+        folder = fsx.join(self.path, "snapshots")
+        if fsx.exists(folder) and not fsx.isdir(folder):
+            raise RepoError("snapshots is not a folder")
+        try:
+            rels = fsx.walk_files(folder)
+        except OSError as exc:
+            raise RepoError(f"snapshots folder cannot be listed: {_why(exc)}") from None
+        names = [rel[:-5] for rel in rels if "/" not in rel and rel.endswith(".json")]
         return sorted(n for n in names if _RE_SNAPSHOT.match(n))
 
     def read_snapshot(self, sid: str) -> dict:
         try:
-            snap = jsonio.read(self.snapshot_path(sid))
+            snap = read_json_strict(self.snapshot_path(sid))
         except (OSError, ValueError) as exc:
-            raise RepoError(f"snapshot {sid} unreadable: {type(exc).__name__}") from None
+            raise RepoError(f"snapshot {sid} unreadable: {_why(exc)}") from None
         if not isinstance(snap, dict) or snap.get("id") != sid or not isinstance(snap.get("files"), list):
             raise RepoError(f"snapshot {sid} malformed")
         if timeutil.classify(snap.get("created"))[0] != "utc":
@@ -158,6 +196,153 @@ class Repo:
 
     def created(self, sid: str) -> dt.datetime:
         return timeutil.parse_utc(self.read_snapshot(sid)["created"])
+
+
+# ----------------------------------------------------------------------------- complete read
+
+UNREADABLE_KINDS = ("index_unreadable", "pack_unreadable", "snapshot_unreadable", "snapshots_unlisted")
+
+
+def inspect(repo: Repo) -> dict:
+    """Read every part of a repository completely and verify it; nothing is skipped, nothing assumed.
+
+    * ``index.json`` is parsed in full (a truncated, empty, non-JSON or malformed index is a problem);
+    * ``pack.bin`` is read in full and every block the index lists must lie inside it and hash to
+      its address;
+    * every snapshot manifest under ``snapshots/`` is read and validated; every block it lists must
+      be in the index, and every file it lists must rebuild to its recorded size and SHA-256, with
+      as many files listed as declared.
+
+    ``superseded/`` (manifests moved out by retention) is not restored and is not read here.
+    Each problem carries its location inside the repository (``index.json``, ``pack.bin``,
+    ``snapshots/<id>.json``). ``present`` is False only for a repository that holds nothing at all
+    (no index, no pack, no manifest). ``verified`` is True only when the repository is present,
+    every part was read to the end, no problem was met and at least one snapshot was read.
+    Comparing a snapshot with the source tree is the restore drill's job, not this one's.
+    """
+    out: dict = {"present": False, "complete": False, "verified": False, "problems": [],
+                 "index": {"file": "index.json", "read": False, "bytes": None, "blocks": None},
+                 "pack": {"file": "pack.bin", "read": False, "bytes": None, "blocks_verified": 0},
+                 "snapshots": {"listed": [], "read": [], "newest": None, "newest_created": None, "files_rebuilt": 0}}
+    problems = out["problems"]
+
+    def problem(kind: str, location: str, note: str, **where) -> None:
+        problems.append(dict({"kind": kind, "location": location, "note": note}, **where))
+
+    try:
+        ids = repo.snapshot_ids()
+    except RepoError as exc:
+        ids = []
+        problem("snapshots_unlisted", "snapshots/", str(exc))
+    out["snapshots"]["listed"] = ids
+    has_index, has_pack = fsx.exists(repo.index_path), fsx.exists(repo.pack_path)
+    out["present"] = bool(has_index or has_pack or ids or problems)
+    if not out["present"]:
+        out["complete"] = True          # nothing is there; a repository that holds nothing is not verified
+        return out
+
+    index = None
+    if has_index:
+        try:
+            out["index"]["bytes"] = fsx.size(repo.index_path)
+            index = repo.load_index()
+        except (OSError, RepoError) as exc:
+            problem("index_unreadable", "index.json", str(exc) if isinstance(exc, RepoError) else _why(exc))
+        else:
+            out["index"].update({"read": True, "blocks": len(index["blocks"])})
+    else:
+        problem("index_unreadable", "index.json", "missing while the repository holds a pack or a snapshot")
+
+    pack = None
+    listed_blocks = len(index["blocks"]) if index is not None else None
+    if has_pack:
+        try:
+            pack = fsx.read_bytes(repo.pack_path)
+        except OSError as exc:
+            problem("pack_unreadable", "pack.bin", _why(exc))
+        else:
+            out["pack"].update({"read": True, "bytes": len(pack)})
+    elif listed_blocks:
+        problem("pack_unreadable", "pack.bin", f"missing while the index lists {listed_blocks} block(s)")
+    elif index is not None:
+        pack = b""                        # nothing listed, nothing stored: consistent
+        out["pack"].update({"read": True, "bytes": 0})
+
+    good: set = set()
+    if index is not None and pack is not None:
+        for sha, (off, length) in sorted(index["blocks"].items()):
+            if off + length > len(pack):
+                problem("block_missing", "pack.bin", f"listed by the index at [{off}, {length}], "
+                        f"beyond the end of the pack ({len(pack)} bytes)", block=sha)
+            elif jsonio.sha256_bytes(pack[off:off + length]) != sha:
+                problem("block_corrupt", "pack.bin", f"bytes at [{off}, {length}] do not hash to their address", block=sha)
+            else:
+                good.add(sha)
+        out["pack"]["blocks_verified"] = len(good)
+
+    rebuilt = 0
+    for sid in ids:
+        where = f"snapshots/{sid}.json"
+        try:
+            snap = repo.read_snapshot(sid)
+        except RepoError as exc:
+            problem("snapshot_unreadable", where, str(exc), snapshot=sid)
+            continue
+        out["snapshots"]["read"].append(sid)
+        if len(snap["files"]) != snap["source_file_count"]:
+            problem("listing_short" if len(snap["files"]) < snap["source_file_count"] else "listing_inconsistent", where,
+                    f"{len(snap['files'])} listed, {snap['source_file_count']} declared", snapshot=sid)
+        seen: set = set()
+        for entry in snap["files"]:
+            rel = entry["path"]
+            if not safe_rel(rel) or rel in seen:
+                problem("unsafe_path", where, "path escapes the root or repeats", snapshot=sid, file=rel)
+                continue
+            seen.add(rel)
+            if index is None or pack is None:
+                continue                  # already reported: the index or the pack cannot be read
+            absent = [b for b in entry["blocks"] if b not in index["blocks"]]
+            if absent:
+                problem("block_missing", where, f"{len(absent)} block(s) listed by the snapshot are not in the index",
+                        snapshot=sid, file=rel, block=absent[0])
+                continue
+            if any(b not in good for b in entry["blocks"]):
+                continue                  # already reported at the pack level, with the block
+            data = b"".join(pack[index["blocks"][b][0]:index["blocks"][b][0] + index["blocks"][b][1]] for b in entry["blocks"])
+            if len(data) != entry["size"]:
+                problem("size_short", where, f"{len(data)} bytes in blocks, {entry['size']} declared", snapshot=sid, file=rel)
+            elif jsonio.sha256_bytes(data) != entry["sha256"]:
+                problem("file_hash", where, "rebuilt bytes differ from the SHA-256 the manifest records", snapshot=sid, file=rel)
+            else:
+                rebuilt += 1
+        if sid == ids[-1]:
+            out["snapshots"].update({"newest": sid, "newest_created": snap["created"]})
+    out["snapshots"]["files_rebuilt"] = rebuilt
+    out["complete"] = not any(p["kind"] in UNREADABLE_KINDS for p in problems)
+    out["verified"] = out["complete"] and not problems and bool(out["snapshots"]["read"])
+    return out
+
+
+def statement(inspection: dict, where: str | None = None) -> str:
+    """One sentence per repository for the report and the console: what was read and verified, or what was not."""
+    if not inspection["present"]:
+        return "NOT verified: the repository holds nothing (no index, no pack, no snapshot manifest)"
+    idx, pack, snaps = inspection["index"], inspection["pack"], inspection["snapshots"]
+    parts = [f"index read in full ({idx['blocks']} block(s))" if idx["read"] else "index NOT read",
+             (f"pack read in full ({pack['bytes']} bytes, {pack['blocks_verified']} of {idx['blocks']} listed block(s) "
+              "hash to their address)" if idx["read"] else
+              f"pack read ({pack['bytes']} bytes) but its blocks cannot be verified without the index")
+             if pack["read"] else "pack NOT read",
+             f"{len(snaps['read'])} of {len(snaps['listed'])} snapshot manifest(s) read",
+             f"{snaps['files_rebuilt']} listed file(s) rebuilt to their recorded SHA-256"]
+    if inspection["verified"]:
+        return "verified: " + ", ".join(parts)
+    if not inspection["problems"]:
+        return "NOT verified: no snapshot to restore (" + ", ".join(parts) + ")"
+    first = inspection["problems"][0]
+    more = len(inspection["problems"]) - 1
+    return (f"NOT verified: {where + '/' if where else ''}{first['location']}: {first['kind']} - {first['note']}"
+            + (f" (+{more} more problem(s))" if more else "") + "; " + ", ".join(parts))
 
 
 def block_size() -> int:

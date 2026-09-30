@@ -114,9 +114,11 @@ def _audit_backup(instance_dir, work_dir, policy, jobs, as_of, found, report, ke
         found.append(F.make(then["class"], rid, then["file"], item, detail=dict(chain["evidence"], timeline=timeline)))
     report["chain"] = chain
 
-    repo_a = backup.Repo(fsx.join(instance_dir, policy["repos"]["a"]["path"]))
-    repo_b = backup.Repo(fsx.join(instance_dir, policy["repos"]["b"]["path"]))
-    second = heartbeat.secondary(policy, repo_a, repo_b, jobs, as_of)
+    path_a, path_b = policy["repos"]["a"]["path"], policy["repos"]["b"]["path"]
+    repo_a = backup.Repo(fsx.join(instance_dir, path_a))
+    repo_b = backup.Repo(fsx.join(instance_dir, path_b))
+    inspection_b = backup.inspect(repo_b)           # the whole secondary: index, pack, every manifest
+    second = heartbeat.secondary(policy, repo_a, repo_b, jobs, as_of, inspection_b)
     if second["finding"]:
         found.append(second["finding"])
     report["secondary"] = {k: v for k, v in second.items() if k != "finding"}
@@ -135,22 +137,32 @@ def _audit_backup(instance_dir, work_dir, policy, jobs, as_of, found, report, ke
     source_dir = fsx.join(instance_dir, policy["source"])
     scratch_a = fsx.join(work_dir, "restore/a")
     result = drill.run(source_dir, repo_a.path, "a", scratch_a, as_of)
-    report["drill"] = result.as_dict()
+    scope = drill.ScopeResult(result, path_a, inspection_b, path_b)
+    report["drill"] = scope.as_dict()                # result: ok only when every backup part in scope was verified
     fallback = None
     if not result.ok:
         then, rid = rules.decide("drill_rules", drill.facts(result, order_inverted))
         report["drill"]["rule"] = rid
         report["drill"]["explained_by"] = then.get("explained_by")
         if then.get("class"):
-            timeline = [[timeutil.fmt(as_of), "drill", f"restore of snapshot {result.snapshot} from {policy['repos']['a']['path']}: "
+            timeline = [[timeutil.fmt(as_of), "drill", f"restore of snapshot {result.snapshot} from {path_a}: "
                          f"{len(result.mismatched_files)} file(s) differ from the source manifest"]]
-            found.append(F.make(then["class"], rid, policy["repos"]["a"]["path"], result.snapshot,
+            found.append(F.make(then["class"], rid, path_a, result.snapshot,
                                 detail={"mismatched_files": result.mismatched_files,
                                         "problems": report["drill"]["problems"],
+                                        "parts": report["drill"]["repositories"]["a"]["problems"],
                                         "registry_claimed_ok": result.snapshot in on_record, "timeline": timeline}))
         second_try = drill.run(source_dir, repo_b.path, "b", fsx.join(work_dir, "restore/b"), as_of)
         fallback = dict(second_try.as_dict(), declared=True)
     report["fallback"] = fallback
+    if not scope.ok and not found:
+        # structural guard: a drill that is not ok never ends in an OK verdict. Every path above already
+        # gives a finding; should one be missed, the repository that was not verified is named here.
+        for name, view in sorted(report["drill"]["repositories"].items()):
+            if not view["verified"]:
+                found.append(F.make("repo_unreadable" if name == "a" else "repo_b_unreadable", "RUN-050", view["path"],
+                                    view["snapshots"]["newest"] if view["snapshots"] else None,
+                                    detail={"statement": view["statement"], "problems": view["problems"]}))
     if state["chain_ok"]:
         drill.append(registry_path, result)
         if fallback is not None:
@@ -165,7 +177,10 @@ def _audit_backup(instance_dir, work_dir, policy, jobs, as_of, found, report, ke
                 verified.discard(result.snapshot)
             elif chain["facts"].get("policy_verify_before_prune"):
                 verified.add(result.snapshot)
-        decision = backup.retention(policy, repo_a, verified)
+        try:
+            decision = backup.retention(policy, repo_a, verified)
+        except backup.RepoError as exc:   # the snapshots of the primary cannot be listed: the drill failed on it already
+            decision = {"decision": "not_evaluated", "class": None, "reason": str(exc)}
         decision["applied"] = False
         if decision["class"]:
             found.append(F.make(decision["class"], decision["rule"], backup.POLICY_FILE, "retention",
@@ -185,8 +200,13 @@ def render(report: dict) -> str:
         lines.append(f"{f['verdict']:<8}{f['class']}  {f['file']}{also}  {f['item'] or '-'}  [{f['rule']}]")
     d = report.get("drill")
     if d:
-        state = "verified against the source manifest" if d["result"] == "ok" else f"failed ({len(d['mismatched_files'])} file(s) differ)"
+        primary = d.get("primary_result", d["result"])
+        state = "verified against the source manifest" if primary == "ok" else f"failed ({len(d['mismatched_files'])} file(s) differ)"
         lines.append(f"drill   repository {d['repo']} snapshot {d['snapshot']}: {state}")
+        for name, view in sorted((d.get("repositories") or {}).items()):
+            lines.append(f"repo    {name} ({view['role']}, {view['path']}): {view['statement']}")
+        if "repositories" in d:
+            lines.append(f"backup  drill result for the whole backup part (every repository read and verified): {d['result']}")
     fb = report.get("fallback")
     if fb:
         state = "verified against the source manifest" if fb["result"] == "ok" else f"failed ({len(fb['mismatched_files'])} file(s) differ)"

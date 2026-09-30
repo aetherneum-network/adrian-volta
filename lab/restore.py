@@ -33,10 +33,16 @@ def restore(repo: Repo, sid: str, dest_dir) -> dict:
     except RepoError as exc:
         out["problems"].append({"kind": "repo_unreadable", "file": None, "note": str(exc)})
         return out
-    try:
-        pack = fsx.read_bytes(repo.pack_path)
-    except OSError:
-        pack = b""
+    if fsx.exists(repo.pack_path) or index["blocks"]:
+        try:
+            pack = fsx.read_bytes(repo.pack_path)
+        except OSError as exc:   # said, never replaced by an empty pack
+            out["problems"].append({"kind": "pack_unreadable", "file": None,
+                                    "note": f"{type(exc).__name__}: pack.bin cannot be read while the index lists "
+                                            f"{len(index['blocks'])} block(s)"})
+            return out
+    else:
+        pack = b""                # no block listed and no pack: only empty files can be restored
     out["declared_count"] = snap["source_file_count"]
     out["listed_count"] = len(snap["files"])
     if len(snap["files"]) != snap["source_file_count"]:
