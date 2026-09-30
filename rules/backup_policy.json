@@ -1,0 +1,132 @@
+{
+  "version": "2026.09.30-1",
+  "kind": "backup_policy",
+  "note": "Three ordered sections. 'chain_rules' decide on the order of the nightly chain (policy and trace). 'drill_rules' classify a restore drill that did not hold; they never turn a failed drill into a success - success is computed from the evidence, not decided here. 'retention_rules' decide whether superseded snapshots may be moved out of the way. First match wins.",
+  "params": {
+    "block_size": 1024
+  },
+  "chain_rules": [
+    {
+      "id": "C-010",
+      "when": {"policy_export_before_backup": false},
+      "then": {"class": "job_order_inverted", "file": "policy/backup.yaml", "item": "chain"},
+      "rationale": "The policy runs the backup before the export it is meant to save: every snapshot holds the previous day's export.",
+      "tests": [
+        {"id": "C-010-a", "input": {"policy_export_before_backup": false, "trace_export_before_backup": false}, "expect": {"class": "job_order_inverted", "file": "policy/backup.yaml"}}
+      ]
+    },
+    {
+      "id": "C-020",
+      "when": {"trace_export_before_backup": false},
+      "then": {"class": "job_order_inverted", "file": "trace.jsonl", "item": "run"},
+      "rationale": "The policy order is right but, in the latest run, the backup started before the export had ended (two independent timers instead of one chain).",
+      "tests": [
+        {"id": "C-020-a", "input": {"policy_export_before_backup": true, "trace_export_before_backup": false}, "expect": {"class": "job_order_inverted", "file": "trace.jsonl"}}
+      ]
+    }
+  ],
+  "drill_rules": [
+    {
+      "id": "B-000",
+      "when": {"repo_readable": false},
+      "then": {"class": "repo_unreadable"},
+      "rationale": "The index or the snapshot cannot be read: nothing can be asserted about the repository.",
+      "tests": [
+        {"id": "B-000-a", "input": {"ok": false, "repo_readable": false, "has_snapshot": false}, "expect": {"class": "repo_unreadable"}}
+      ]
+    },
+    {
+      "id": "B-005",
+      "when": {"has_snapshot": false},
+      "then": {"class": "no_snapshot"},
+      "rationale": "A repository without a snapshot has nothing to restore.",
+      "tests": [
+        {"id": "B-005-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": false}, "expect": {"class": "no_snapshot"}}
+      ]
+    },
+    {
+      "id": "B-007",
+      "when": {"source_files": 0},
+      "then": {"class": "source_unreadable"},
+      "rationale": "An empty or missing source tree gives nothing to compare with: an empty comparison is not a successful one.",
+      "tests": [
+        {"id": "B-007-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 0}, "expect": {"class": "source_unreadable"}}
+      ]
+    },
+    {
+      "id": "B-010",
+      "when": {"blocks_corrupt": {"ge": 1}},
+      "then": {"class": "block_corrupt"},
+      "rationale": "A block whose content does not hash to its address is corrupt. Before the truncation rule: a corrupt block is a different defect from a missing one.",
+      "tests": [
+        {"id": "B-010-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 1, "truncated": false, "mismatched": 1}, "expect": {"class": "block_corrupt"}}
+      ]
+    },
+    {
+      "id": "B-020",
+      "when": {"truncated": true},
+      "then": {"class": "backup_truncated"},
+      "rationale": "Blocks beyond the end of the pack, a file listing shorter than the declared count, or a file with fewer bytes than its declared size: the backup was cut short.",
+      "tests": [
+        {"id": "B-020-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 0, "truncated": true, "mismatched": 2}, "expect": {"class": "backup_truncated"}}
+      ]
+    },
+    {
+      "id": "B-030",
+      "when": {"mismatched": {"ge": 1}, "order_inverted": true, "other_problems": 0},
+      "then": {"class": null, "explained_by": "job_order_inverted"},
+      "rationale": "The snapshot is intact but differs from the source, and the chain ran the backup before the export: the chain finding already carries the failure, a second class would count it twice.",
+      "tests": [
+        {"id": "B-030-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 0, "truncated": false, "mismatched": 1, "order_inverted": true, "other_problems": 0}, "expect": {"explained_by": "job_order_inverted"}}
+      ]
+    },
+    {
+      "id": "B-090",
+      "when": {"ok": false},
+      "then": {"class": "restore_mismatch"},
+      "rationale": "Every other drill that did not hold: the restored tree is not the source tree. Unclassified is still failed.",
+      "tests": [
+        {"id": "B-090-a", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 0, "truncated": false, "mismatched": 1, "order_inverted": false, "other_problems": 0}, "expect": {"class": "restore_mismatch"}},
+        {"id": "B-090-b", "input": {"ok": false, "repo_readable": true, "has_snapshot": true, "source_files": 8, "blocks_corrupt": 0, "truncated": false, "mismatched": 0, "order_inverted": false, "other_problems": 1}, "expect": {"class": "restore_mismatch"}}
+      ]
+    }
+  ],
+  "retention_rules": [
+    {
+      "id": "RT-005",
+      "when": {"keep_last_valid": false},
+      "then": {"class": "retention_unreadable", "decision": "block"},
+      "rationale": "A retention count that is not a non-negative integer is not applied.",
+      "tests": [
+        {"id": "RT-005-a", "input": {"keep_last_valid": false}, "expect": {"decision": "block"}}
+      ]
+    },
+    {
+      "id": "RT-010",
+      "when": {"to_supersede": {"ge": 1}, "kept_verified": 0},
+      "then": {"class": "retention_deletes_only_valid", "decision": "block"},
+      "rationale": "After the move, no snapshot with a successful restore drill on record would remain among those kept. Nothing is moved, nothing is removed.",
+      "tests": [
+        {"id": "RT-010-a", "input": {"keep_last_valid": true, "to_supersede": 2, "kept_verified": 0}, "expect": {"class": "retention_deletes_only_valid", "decision": "block"}}
+      ]
+    },
+    {
+      "id": "RT-020",
+      "when": {"to_supersede": {"ge": 1}},
+      "then": {"class": null, "decision": "supersede"},
+      "rationale": "Older snapshots are superseded: moved to 'superseded/', never deleted.",
+      "tests": [
+        {"id": "RT-020-a", "input": {"keep_last_valid": true, "to_supersede": 1, "kept_verified": 2}, "expect": {"decision": "supersede"}}
+      ]
+    },
+    {
+      "id": "RT-030",
+      "when": {},
+      "then": {"class": null, "decision": "nothing"},
+      "rationale": "Nothing exceeds the retention count.",
+      "tests": [
+        {"id": "RT-030-a", "input": {"keep_last_valid": true, "to_supersede": 0, "kept_verified": 1}, "expect": {"decision": "nothing"}}
+      ]
+    }
+  ]
+}
