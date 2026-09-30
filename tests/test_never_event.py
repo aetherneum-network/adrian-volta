@@ -108,6 +108,15 @@ def add_extra_file(repo_dir: str, rng: random.Random) -> None:
     jsonio.write(repo.snapshot_path(snap["id"]), snap)
 
 
+def rename_in_listing(repo_dir: str, rng: random.Random) -> None:
+    """One file of the newest snapshot is listed under another name: same bytes, same count, wrong place."""
+    repo, snap = newest(repo_dir)
+    entry = rng.choice(snap["files"])
+    entry["path"] = "dati/rinominato-" + entry["path"].rsplit("/", 1)[-1]
+    snap["files"] = sorted(snap["files"], key=lambda e: e["path"])
+    jsonio.write(repo.snapshot_path(snap["id"]), snap)
+
+
 def change_source(inst: str, rng: random.Random) -> None:
     rel = rng.choice(fsx.walk_files(os.path.join(inst, "source")))
     fsx.append_bytes(fsx.join(os.path.join(inst, "source"), rel), b"changed after the backup")
@@ -117,7 +126,8 @@ def add_source(inst: str, rng: random.Random) -> None:
     fsx.write_bytes(os.path.join(inst, "source", "dati", "nuovo-dopo-il-backup.txt"), rng.randbytes(40))
 
 
-REPO_DAMAGE = [flip_byte, truncate_pack, drop_from_listing, drop_and_recount, cut_blocks, forge_file, swap_index, add_extra_file]
+REPO_DAMAGE = [flip_byte, truncate_pack, drop_from_listing, drop_and_recount, cut_blocks, forge_file, swap_index, add_extra_file,
+               rename_in_listing]
 
 
 class Base(U.TempCase):
