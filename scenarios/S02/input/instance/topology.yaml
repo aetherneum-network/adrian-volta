@@ -1,0 +1,171 @@
+company: "Molino Serrabruna S.r.l."
+domain: serrabruna.example
+entrypoints:
+  public:
+    plane: public
+    network: edge-public
+  admin:
+    plane: admin
+    network: edge-admin
+networks:
+  edge-public:
+    plane: public
+  edge-admin:
+    plane: admin
+  app-1:
+    plane: internal
+services:
+  shop:
+    plane: public
+    port: 8080
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  catalog:
+    plane: public
+    port: 8000
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  orders:
+    plane: public
+    port: 8081
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  docs:
+    plane: public
+    port: 3000
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  press:
+    plane: public
+    port: 5000
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  careers:
+    plane: public
+    port: 9000
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  tracking:
+    plane: public
+    port: 9090
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  quotes:
+    plane: public
+    port: 8443
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  suppliers:
+    plane: public
+    port: 8080
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  gallery:
+    plane: public
+    port: 8000
+    networks:
+      - edge-public
+      - app-1
+    restart:
+      policy: always
+    health:
+      kind: http
+      path: /healthz
+  console:
+    plane: admin
+    port: 8443
+    networks:
+      - edge-admin
+      - app-1
+    restart:
+      policy: on-failure
+      max_restarts: 5
+    health:
+      kind: process
+  metrics:
+    plane: admin
+    port: 9090
+    networks:
+      - edge-admin
+      - app-1
+    restart:
+      policy: on-failure
+      max_restarts: 5
+    health:
+      kind: process
+  wiki:
+    plane: admin
+    port: 3000
+    networks:
+      - edge-admin
+      - app-1
+    restart:
+      policy: on-failure
+      max_restarts: 5
+    health:
+      kind: process
+  scheduler:
+    plane: admin
+    port: 5000
+    networks:
+      - edge-admin
+      - app-1
+    restart:
+      policy: on-failure
+      max_restarts: 5
+    health:
+      kind: process

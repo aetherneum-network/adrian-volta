@@ -1,0 +1,44 @@
+{
+  "network": {
+    "exit_code": 2,
+    "findings": [
+      {
+        "also": [],
+        "class": "admin_on_public",
+        "file": "topology.yaml",
+        "item": "metrics",
+        "rule": "RL-S10",
+        "verdict": "BLOCKED"
+      }
+    ],
+    "verdict": "BLOCKED"
+  },
+  "router": {
+    "edges_as_loaded": [
+      [
+        "public",
+        "registry"
+      ]
+    ],
+    "edges_in_accepted_table": [],
+    "edges_reference": [
+      [
+        "public",
+        "registry"
+      ]
+    ],
+    "exit_code": 2,
+    "findings": [
+      {
+        "also": [],
+        "class": "admin_on_public",
+        "file": "routes/registry.yaml",
+        "item": "registry-main",
+        "rule": "RL-050",
+        "verdict": "BLOCKED"
+      }
+    ],
+    "verdict": "BLOCKED"
+  },
+  "scenario": "S03"
+}

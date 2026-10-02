@@ -1,0 +1,66 @@
+{
+  "created": "2026-09-17T02:35:20Z",
+  "files": [
+    {
+      "blocks": [
+        "ece2d0ac6d791ef98e82335a810afd63c8cb77a1c86bd6ecdebe31650f8c6ac5",
+        "320471c73f9f960dd9ae1a60687808080093337a3b436b66d2ab6cdd17213fee",
+        "11fb248892d3be77c31ebc4e7fef7667497291ae860ac5d15356f6b1eccaff53"
+      ],
+      "path": "amministrazione/Listino prezzi.txt",
+      "sha256": "0bd0a2eed6684b42792cffea0c6b61ee1ad89fa1fff20c0bf2ee9dd5f9d010da",
+      "size": 2300
+    },
+    {
+      "blocks": [
+        "b1d6db78a720a4f5207c8ddf19af5d4649b20578cc1c0e70daec1271cd9293c4",
+        "5eabfe7981ec92335315a14558a8ef8902b0a757a28e99ff27561b4e25ce4f43"
+      ],
+      "path": "amministrazione/Verbale assemblea già firmato.txt",
+      "sha256": "9eac40e1d0ebf8850ff80450480c2720dbd4323c06bc4c22dc04e803ec0d5faa",
+      "size": 1536
+    },
+    {
+      "blocks": [
+        "4bd61c431a2791a9a6d4a474c2c6f7af8929784190e94a207072ccab5b228e28",
+        "d97a921f54d315e6f406e24529c5f1051c35b7345082de95a957fc0d9ac937d6",
+        "ab251f02c51fb717c3bfc482b5297c5a075e8b8e159f2cbcf53485a190004492",
+        "803950b69011859d6080ea4234366f9a375b28c962dbbde75e1c66d32bae54d1",
+        "ca8dad4d4bf08bd2e887f0dc4a5987ce6050bee058cb54b0ff0c30e3c895955c"
+      ],
+      "path": "archivio/2025/Relazione attività.md",
+      "sha256": "9534083017a2b1bff3426d09913f36efe2e49665d270555d124d16039a944326",
+      "size": 4100
+    },
+    {
+      "blocks": [
+        "76a220a09f27e2d0704bd8532dd2a89cbf96275597164a736420441ad433ca8a"
+      ],
+      "path": "export/pelli-export.csv",
+      "sha256": "76a220a09f27e2d0704bd8532dd2a89cbf96275597164a736420441ad433ca8a",
+      "size": 654
+    },
+    {
+      "blocks": [
+        "d89245220d38b00c465948f64491b39bdc6279fc61e82a7aa1326c8d71013884",
+        "d1ad3eab526cc09494e0a738ac5e935c5fe732bf9fc4cd2e25f29e0644c5ea87",
+        "46925de1459f5046d173748bd18ee591f2a2551e3ead5ddc2d1a1b34f0afdfc9"
+      ],
+      "path": "produzione/reparto-2/Scheda qualità più recente.md",
+      "sha256": "2ccf0a55c4a2a0244adc0de585bf7a445ae09908b761bb394d6b29228c94e9e8",
+      "size": 3000
+    },
+    {
+      "blocks": [
+        "1338a128d9973cb7157af3568efe2ab3288a11bb91eca7a66e81b600ea4c41a9"
+      ],
+      "path": "produzione/reparto-2/Turni.txt",
+      "sha256": "1338a128d9973cb7157af3568efe2ab3288a11bb91eca7a66e81b600ea4c41a9",
+      "size": 700
+    }
+  ],
+  "format": 1,
+  "id": "20260917T023520Z",
+  "source_file_count": 6,
+  "total_bytes": 12290
+}

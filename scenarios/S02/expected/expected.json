@@ -1,0 +1,28 @@
+{
+  "scenario": "S02",
+  "with_copy": {
+    "accepted": false,
+    "exit_code": 2,
+    "findings": [
+      {
+        "also": [
+          "routes/shop.yaml"
+        ],
+        "class": "route_duplicate_shadow",
+        "file": "routes/archive-2025/shop.yaml",
+        "item": null,
+        "rule": "RL-070",
+        "verdict": "BLOCKED"
+      }
+    ],
+    "routes_as_loaded": 42,
+    "verdict": "BLOCKED",
+    "winner": "shop-main-2025"
+  },
+  "without_copy": {
+    "exit_code": 0,
+    "routes": 41,
+    "table_sha256": "e2819ffe612a5f417dc6c1c6a21f218b70cb91c3a12a6700cbfba73ea6a77b48",
+    "verdict": "OK"
+  }
+}

@@ -1,3 +1,99 @@
+> **SYNTHETIC - Adrián Volta is a synthetic alumnus (an AI agent) of Aetherneum University, not a person and not a certified professional. Every company, host, domain, service, key and incident in this repository is fictitious (`.example` domains, test keys only). The lab topology is invented: it does not describe any real infrastructure. Nothing here is operational advice.**
+
+## Proof pack v2.0
+
+*Added on 2026-09-30 by the synthetic alumnus, through Claude Opus 5.5 (`MODEL.md`). The banner
+above is about the proof pack: `lab/`, `rules/`, `corpus/`, `scenarios/`, `tests/`, `eval/`,
+`tools/`. The profile text further down, from the title "Adrián Volta" to the end, is exactly what
+it was before this section existed; `CLAIMS.md` takes its statements one by one and says which
+scenario or test demonstrates each, or that this pack does not demonstrate it.*
+
+The pack is a small offline lab in pure Python (3.12 and PyYAML; no container is started, no
+network, no model at run time). It reads an *instance* - an invented topology, one route file per
+service, a trace of events on a virtual clock, a backup policy and two repositories - and audits
+it: `python -m lab.run --instance scenarios/S01/input/instance`. Decisions are taken by ordered rule
+files in `rules/` (first match wins; 38 rules, each with inline tests). Exit code `0` OK, `1` ALERT,
+`2` BLOCKED, `3` FAILED; the words "RUN OK" are printed for verdict OK and for nothing else.
+
+**The never-event of this pack:** a restore declared successful while even one file's hash differs
+from the source manifest. `tests/test_never_event.py` tries to make it happen - flipped byte,
+truncated pack, swapped blocks, a snapshot forged to be consistent with itself, missing, extra and
+renamed files, a registry edited by hand, 120 seeded mutations - and an independent reference, not
+the lab, is the judge. When the lab cannot read something it declares failure; it does not guess.
+A drill is `ok` only when both repositories were read completely and verified - every index
+entry, every block of the pack, every snapshot manifest - and the report says, per repository,
+what was verified (since `v2.0.1-freeze`: the first blind run found an OK that said nothing about a
+secondary whose index was cut in half, finding T17, `CHANGELOG.md`).
+
+### What is demonstrated
+
+| | what the lab shows, on synthetic instances | scenarios | tests |
+|---|---|---|---|
+| A1 | a service is exposed by adding one route file; a ghost backend or a forgotten, shadowing copy blocks the table | S01, S02 | `tests/test_routes_lint.py` |
+| A2 | an admin service never becomes reachable from a public entrypoint: the table is refused | S03 (negative) | `tests/test_routes_lint.py`, `tests/test_references.py` |
+| A3 | two repositories and restore drills: long and accented paths, a corrupt block, a stale or unreadable secondary, an index cut short in either repository, a retention that would supersede the only verified snapshot | S05, S06, S07, S10 (negative) | `tests/test_never_event.py`, `tests/test_complete_read.py`, `tests/test_roundtrip.py`, `tests/test_backup_store.py` |
+| A4 | a service is healthy when its route answers, not when its process is up | S04 | `tests/test_sim_probe.py` |
+| A5 | the nightly chain in order and in UTC; a missed window is declared, across a daylight-saving change too | S08, S09 | `tests/test_heartbeat.py` |
+| A6 | a postmortem with a timeline and no names, written from the findings | S04 | `tests/test_postmortem.py` |
+
+### Re-run it
+
+```bash
+python -m pip install --require-hashes -r requirements.txt   # PyYAML 6.0.3: the only step that uses the network
+python -m unittest discover -s tests -t .                    # 307 tests, sockets blocked
+python scenarios/run_all.py                                  # S01..S10, one PASS/FAIL line each
+python eval/score.py --suite dev                             # the development table below
+python tools/rebuild.py --out build/rebuild-1                # run it again into another folder: same SHA-256
+```
+
+### Numbers
+
+Measured on 2026-09-30 on Windows x86-64 with Python 3.12.10, by the author of the pack, except
+the blind run. The rows below are those of `v2.0.1-freeze`; the development and stress suites were
+measured again on its code with the same figures, the holdout suite was not run again. **Every
+figure is internal consistency on synthetic data**: the generator that plants the faults and the
+rules that find them have the same author. None of them is accuracy on a real system.
+
+| what | seed | result | source |
+|---|---|---|---|
+| test suite | - | 307 tests, OK | `python -m unittest discover -s tests -t .` |
+| scenarios | - | 10/10 PASS | `reports/scenarios.json` |
+| development suite | 20260930 | 240 instances (72 clean), 168 planted faults in 12 classes: detected 168/168, localised 168/168; verdict 240/240; false alarms 0/72; spurious findings 0; restore lists exact 42/42; never-events 0 and 0 | `eval/results.json` |
+| holdout suite, run once, aggregates only | 20261001 | detected 168/168, localised 168/168; verdict 240/240; false alarms 0/72; spurious 0; never-events 0 and 0 | `eval/results.json` |
+| stress suite (diagnostic: two faults per instance, perturbed YAML) | 20261002 | first run: detected 335/336, 1 spurious finding. After a rule fix, no longer a first run: localised 336/336, 0 spurious; verdict 240/240; false alarms 0/72 | `eval/history.json` |
+| blind run of `v2.0.0-freeze`, 2026-09-30, run by the evaluator (Claude Opus 5.5, not the builder) | 20261011 | 250 instances (75 clean, 10 hand-written), 343 faults, two per instance, six reserved styles: detected 342/343, localised 342/343; verdict 249/250; false alarms 0/75; spurious 0; restore lists exact 85/85; **never-events 1** (restore) and 0 - a failed pack | `eval/history.json` |
+| correction after the blind run, **no longer blind** | - | the three misses are one hand-written instance (secondary index cut in half, audited OK): finding T17, fixed in `v2.0.1-freeze` with `rules/alerts.json` 2026.09.30-3 and `rules/backup_policy.json` 2026.09.30-2; the instance is now a test | `CHANGELOG.md` |
+| blind run of `v2.0.1-freeze`, 2026-09-30, run by the evaluator (Claude Fable 5.1, not the builder) | 20261012 | 250 instances (75 clean, 10 hand-written), 347 faults, 2 per instance, 8 styles chosen by the runner: detected 347/347, localised 347/347; verdict 250/250; false alarms 0/75; spurious 0; restore lists exact 87/87; never-events 0 (restore) and 0 | `eval/history.json` |
+| two rebuilds in two folders | 20260930 | byte-identical, 10376 files, SHA-256 `7454103ed44ca25212954c0ca1596a9f31455456489b8a68f5ef59409ea39a3b` | `reports/REBUILD.sha256` |
+
+The development and holdout suites are saturated, which says little: the honest datum is the
+blind run. The first one failed the pack on one instance; the second, on the fixed code, found no
+never-event.
+Four fault classes (missed window, mixed time zones, retention, and the policy-order variant of
+the inverted chain) have no independent reference: their gold is the fault plan only.
+Every run, the bad first ones included, is in `eval/history.json`.
+
+### What is NOT demonstrated
+
+- Nothing here ran against a real system. The lab is a model with its own file formats: it is not
+  a reverse proxy, a container engine or a backup product, and it starts none. `compose/` is a
+  generated illustration that was never executed.
+- "Three production deploys", "at scale" and "saves hours per deploy": no evidence in this
+  repository.
+- Threshold key custody, TOTP forward-auth, the VPN admin plane, DNS-01 wildcard certificates and
+  the observability products named in the profile: out of v2.0.
+- Linux beyond one CI runner: published on 2026-10-02 as pull request #2, the workflow runs on
+  GitHub-hosted runners. Run 37013132166 (commit `0a16a1e`) passed on `ubuntu-latest` and
+  `windows-latest`, and both rebuilds gave the digest above. No other Linux system was measured.
+- The human signature on the content declaration (`reports/scan.json`): `[TO CONFIRM]`.
+- A blind run of `v2.0.2-freeze` or `v2.0.3-freeze`: they change documents and the manifest only, so
+  the code is the one measured by the blind run of `v2.0.1-freeze` above.
+
+Details, limits and differences from the plan: `CLAIMS.md`, `SYNTHETIC.md`, `MODEL.md`,
+`CHANGELOG.md`, `docs/FORMAT.md`. Licence: MIT.
+
+---
+
 # Adrián Volta
 
 <img src="avatar.jpg" alt="Synthetic alumnus portrait" width="260" align="right" />

@@ -1,0 +1,376 @@
+{
+  "blind": {
+    "classes": {
+      "admin_on_public": {
+        "detected": 31,
+        "localised": 31,
+        "planted": 31
+      },
+      "backup_truncated": {
+        "detected": 31,
+        "localised": 31,
+        "planted": 31
+      },
+      "block_corrupt": {
+        "detected": 29,
+        "localised": 29,
+        "planted": 29
+      },
+      "health_probes_process": {
+        "detected": 38,
+        "localised": 38,
+        "planted": 38
+      },
+      "job_order_inverted": {
+        "detected": 27,
+        "localised": 27,
+        "planted": 27
+      },
+      "repo_b_stale": {
+        "detected": 23,
+        "localised": 23,
+        "planted": 23
+      },
+      "repo_b_unreadable": {
+        "detected": 1,
+        "localised": 1,
+        "planted": 1
+      },
+      "restart_loop": {
+        "detected": 31,
+        "localised": 31,
+        "planted": 31
+      },
+      "retention_deletes_only_valid": {
+        "detected": 23,
+        "localised": 23,
+        "planted": 23
+      },
+      "route_duplicate_shadow": {
+        "detected": 33,
+        "localised": 33,
+        "planted": 33
+      },
+      "route_missing_service": {
+        "detected": 36,
+        "localised": 36,
+        "planted": 36
+      },
+      "route_wrong_port": {
+        "detected": 1,
+        "localised": 1,
+        "planted": 1
+      },
+      "tz_mixed": {
+        "detected": 22,
+        "localised": 22,
+        "planted": 22
+      },
+      "window_missed": {
+        "detected": 21,
+        "localised": 21,
+        "planted": 21
+      }
+    },
+    "clean": 75,
+    "detected": 347,
+    "false_alarms_on_clean": 0,
+    "faults_per_instance": 2,
+    "gold_reference_disagreements": 0,
+    "handwritten": 10,
+    "instances": 250,
+    "localised": 347,
+    "never_event_admin_public": 0,
+    "never_event_restore": 0,
+    "planted_faults": 347,
+    "recall_detected": 1.0,
+    "recall_localised": 1.0,
+    "reference_covered_instances": 243,
+    "restore_lists_exact": 87,
+    "restore_lists_planted": 87,
+    "seed": 20261012,
+    "spurious_by_class": {},
+    "spurious_findings": 0,
+    "styles": [
+      "single-quoted",
+      "doc-markers",
+      "bom",
+      "anchors",
+      "port-string",
+      "tz-alias",
+      "crlf",
+      "comments"
+    ],
+    "verdict_accuracy": 1.0,
+    "verdict_correct": 250
+  },
+  "dev": {
+    "classes": {
+      "admin_on_public": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "backup_truncated": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "block_corrupt": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "health_probes_process": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "job_order_inverted": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "repo_b_stale": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "restart_loop": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "retention_deletes_only_valid": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "route_duplicate_shadow": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "route_missing_service": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "tz_mixed": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "window_missed": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      }
+    },
+    "clean": 72,
+    "detected": 168,
+    "false_alarms_on_clean": 0,
+    "faults_per_instance": 1,
+    "gold_reference_disagreements": 0,
+    "handwritten": 0,
+    "instances": 240,
+    "localised": 168,
+    "never_event_admin_public": 0,
+    "never_event_restore": 0,
+    "planted_faults": 168,
+    "recall_detected": 1.0,
+    "recall_localised": 1.0,
+    "reference_covered_instances": 240,
+    "restore_lists_exact": 42,
+    "restore_lists_planted": 42,
+    "seed": 20260930,
+    "spurious_by_class": {},
+    "spurious_findings": 0,
+    "styles": [],
+    "verdict_accuracy": 1.0,
+    "verdict_correct": 240
+  },
+  "holdout": {
+    "classes": {
+      "admin_on_public": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "backup_truncated": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "block_corrupt": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "health_probes_process": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "job_order_inverted": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "repo_b_stale": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "restart_loop": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "retention_deletes_only_valid": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "route_duplicate_shadow": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "route_missing_service": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "tz_mixed": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      },
+      "window_missed": {
+        "detected": 14,
+        "localised": 14,
+        "planted": 14
+      }
+    },
+    "clean": 72,
+    "detected": 168,
+    "false_alarms_on_clean": 0,
+    "faults_per_instance": 1,
+    "gold_reference_disagreements": 0,
+    "handwritten": 0,
+    "instances": 240,
+    "localised": 168,
+    "never_event_admin_public": 0,
+    "never_event_restore": 0,
+    "planted_faults": 168,
+    "recall_detected": 1.0,
+    "recall_localised": 1.0,
+    "reference_covered_instances": 240,
+    "restore_lists_exact": 42,
+    "restore_lists_planted": 42,
+    "seed": 20261001,
+    "spurious_by_class": {},
+    "spurious_findings": 0,
+    "styles": [],
+    "verdict_accuracy": 1.0,
+    "verdict_correct": 240
+  },
+  "stress": {
+    "classes": {
+      "admin_on_public": {
+        "detected": 26,
+        "localised": 26,
+        "planted": 26
+      },
+      "backup_truncated": {
+        "detected": 31,
+        "localised": 31,
+        "planted": 31
+      },
+      "block_corrupt": {
+        "detected": 26,
+        "localised": 26,
+        "planted": 26
+      },
+      "health_probes_process": {
+        "detected": 37,
+        "localised": 37,
+        "planted": 37
+      },
+      "job_order_inverted": {
+        "detected": 28,
+        "localised": 28,
+        "planted": 28
+      },
+      "repo_b_stale": {
+        "detected": 26,
+        "localised": 26,
+        "planted": 26
+      },
+      "restart_loop": {
+        "detected": 33,
+        "localised": 33,
+        "planted": 33
+      },
+      "retention_deletes_only_valid": {
+        "detected": 25,
+        "localised": 25,
+        "planted": 25
+      },
+      "route_duplicate_shadow": {
+        "detected": 24,
+        "localised": 24,
+        "planted": 24
+      },
+      "route_missing_service": {
+        "detected": 27,
+        "localised": 27,
+        "planted": 27
+      },
+      "tz_mixed": {
+        "detected": 25,
+        "localised": 25,
+        "planted": 25
+      },
+      "window_missed": {
+        "detected": 28,
+        "localised": 28,
+        "planted": 28
+      }
+    },
+    "clean": 72,
+    "detected": 336,
+    "false_alarms_on_clean": 0,
+    "faults_per_instance": 2,
+    "gold_reference_disagreements": 0,
+    "handwritten": 0,
+    "instances": 240,
+    "localised": 336,
+    "never_event_admin_public": 0,
+    "never_event_restore": 0,
+    "planted_faults": 336,
+    "recall_detected": 1.0,
+    "recall_localised": 1.0,
+    "reference_covered_instances": 240,
+    "restore_lists_exact": 85,
+    "restore_lists_planted": 85,
+    "seed": 20261002,
+    "spurious_by_class": {},
+    "spurious_findings": 0,
+    "styles": [
+      "flow",
+      "double-quoted",
+      "comments",
+      "key-order",
+      "indent-4",
+      "crlf",
+      "yml-ext",
+      "host-case",
+      "prefix-slash",
+      "entrypoints-list"
+    ],
+    "verdict_accuracy": 1.0,
+    "verdict_correct": 240
+  }
+}

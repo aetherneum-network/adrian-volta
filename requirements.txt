@@ -1,0 +1,13 @@
+# Lockfile of the proof pack (evidence item E4). One third-party package, pinned with hashes:
+#
+#     python -m pip install --require-hashes -r requirements.txt
+#
+# Everything else is the Python 3.12 standard library. The two hashes below are the published
+# wheels for CPython 3.12 on Windows x86-64 and on Linux x86-64 (manylinux); they were computed
+# with "pip download PyYAML==6.0.3 --no-deps" and "pip hash" (pip 25.0.1) on 2026-09-30, which is
+# the only network operation made while building this pack. Another platform or Python version
+# needs its own wheel hash: add a line, do not remove these. No hash of the source archive is
+# listed (its local build failed here, so it was not verified).
+PyYAML==6.0.3 \
+    --hash=sha256:5fcd34e47f6e0b794d17de1b4ff496c00986e1c83f7ab2fb8fcfe9616ff7477b \
+    --hash=sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc

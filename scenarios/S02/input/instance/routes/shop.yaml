@@ -1,0 +1,25 @@
+service: shop
+routers:
+  - name: shop-main
+    entrypoint: public
+    host: shop.serrabruna.example
+    path_prefix: /
+    backend: shop-backend
+  - name: shop-api
+    entrypoint: public
+    host: shop.serrabruna.example
+    path_prefix: /api
+    backend: shop-backend
+  - name: shop-docs
+    entrypoint: public
+    host: shop.serrabruna.example
+    path_prefix: /docs
+    backend: shop-backend
+  - name: shop-status
+    entrypoint: public
+    host: shop.serrabruna.example
+    path_prefix: /status
+    backend: shop-backend
+backends:
+  shop-backend:
+    target: "shop:8080"

@@ -1,0 +1,9 @@
+{
+  "as_of": "2026-09-15T06:00:00Z",
+  "company": "Molino Serrabruna S.r.l.",
+  "instance_id": "S02-serrabruna-forgotten-copy",
+  "scope": [
+    "routing"
+  ],
+  "synthetic": true
+}

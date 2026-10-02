@@ -1,0 +1,15 @@
+service: scheduler
+routers:
+  - name: scheduler-main
+    entrypoint: admin
+    host: scheduler.serrabruna.example
+    path_prefix: /
+    backend: scheduler-backend
+  - name: scheduler-api
+    entrypoint: admin
+    host: scheduler.serrabruna.example
+    path_prefix: /api
+    backend: scheduler-backend
+backends:
+  scheduler-backend:
+    target: "scheduler:5000"

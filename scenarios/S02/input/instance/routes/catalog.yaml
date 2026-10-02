@@ -1,0 +1,25 @@
+service: catalog
+routers:
+  - name: catalog-main
+    entrypoint: public
+    host: catalog.serrabruna.example
+    path_prefix: /
+    backend: catalog-backend
+  - name: catalog-api
+    entrypoint: public
+    host: catalog.serrabruna.example
+    path_prefix: /api
+    backend: catalog-backend
+  - name: catalog-docs
+    entrypoint: public
+    host: catalog.serrabruna.example
+    path_prefix: /docs
+    backend: catalog-backend
+  - name: catalog-status
+    entrypoint: public
+    host: catalog.serrabruna.example
+    path_prefix: /status
+    backend: catalog-backend
+backends:
+  catalog-backend:
+    target: "catalog:8000"

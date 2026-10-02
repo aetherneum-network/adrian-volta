@@ -1,0 +1,16 @@
+{
+  "id": "S01",
+  "title": "A new service is exposed by adding one file",
+  "company": "Cartiera Valdora S.p.A.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "Four services are routed; a fifth (tracking) is declared in the topology but has no route. One file, input/new/tracking.yaml, is added under routes/.",
+  "pass_criterion": "The table is accepted before and after; the diff is exactly 1 entry added, 0 removed, 0 changed; every pre-existing file is byte-identical; the new public host resolves to tracking:3000 and is not served on the admin entrypoint.",
+  "lesson": "Exposing a service is one reviewable file; the diff of the route table is the review."
+}

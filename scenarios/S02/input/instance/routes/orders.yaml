@@ -1,0 +1,25 @@
+service: orders
+routers:
+  - name: orders-main
+    entrypoint: public
+    host: orders.serrabruna.example
+    path_prefix: /
+    backend: orders-backend
+  - name: orders-api
+    entrypoint: public
+    host: orders.serrabruna.example
+    path_prefix: /api
+    backend: orders-backend
+  - name: orders-docs
+    entrypoint: public
+    host: orders.serrabruna.example
+    path_prefix: /docs
+    backend: orders-backend
+  - name: orders-status
+    entrypoint: public
+    host: orders.serrabruna.example
+    path_prefix: /status
+    backend: orders-backend
+backends:
+  orders-backend:
+    target: "orders:8081"

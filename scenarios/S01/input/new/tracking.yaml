@@ -1,0 +1,10 @@
+service: tracking
+routers:
+  - name: tracking-main
+    entrypoint: public
+    host: tracking.valdora.example
+    path_prefix: /
+    backend: tracking-backend
+backends:
+  tracking-backend:
+    target: "tracking:3000"

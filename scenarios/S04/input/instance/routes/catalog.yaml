@@ -1,0 +1,10 @@
+service: catalog
+routers:
+  - name: catalog-main
+    entrypoint: public
+    host: catalog.valdora.example
+    path_prefix: /
+    backend: catalog-backend
+backends:
+  catalog-backend:
+    target: "catalog:8000"

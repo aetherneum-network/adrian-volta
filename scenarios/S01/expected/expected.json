@@ -1,0 +1,34 @@
+{
+  "after": {
+    "exit_code": 0,
+    "routes": 7,
+    "table_sha256": "259d6e64705aee5e67f88f606d7654249184572b76177137530ac8614099daf1",
+    "verdict": "OK"
+  },
+  "before": {
+    "routes": 6,
+    "table_sha256": "d41afc3cadc750a49c9cabab79fc69fe7a250a1469877e7a798ff59797c2a4a5",
+    "verdict": "OK"
+  },
+  "diff": {
+    "added": [
+      {
+        "backend": "tracking-backend",
+        "entrypoint": "public",
+        "file": "routes/tracking.yaml",
+        "host": "tracking.valdora.example",
+        "path_prefix": "/",
+        "priority": 0,
+        "router": "tracking-main",
+        "target_port": 3000,
+        "target_service": "tracking"
+      }
+    ],
+    "changed": [],
+    "removed": []
+  },
+  "files_added": [
+    "routes/tracking.yaml"
+  ],
+  "scenario": "S01"
+}

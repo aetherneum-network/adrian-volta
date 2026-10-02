@@ -1,0 +1,10 @@
+{
+  "as_of": "2026-09-14T07:00:00Z",
+  "company": "Cartiera Valdora S.p.A.",
+  "instance_id": "S04-valdora-status-404",
+  "scope": [
+    "routing",
+    "health"
+  ],
+  "synthetic": true
+}

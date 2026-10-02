@@ -1,0 +1,59 @@
+[
+  {
+    "changes": [
+      {
+        "path": "produzione/Registro lotti.txt",
+        "seed": "S07:lotti:2026-09-09",
+        "size": 3300
+      }
+    ],
+    "export_seed": "S07:export:2026-09-09",
+    "run": "2026-09-09",
+    "start": "2026-09-09T02:30:00Z"
+  },
+  {
+    "changes": [
+      {
+        "path": "produzione/Registro lotti.txt",
+        "seed": "S07:lotti:2026-09-10",
+        "size": 3340
+      }
+    ],
+    "claimed_not_done": [
+      "backup_b"
+    ],
+    "export_seed": "S07:export:2026-09-10",
+    "run": "2026-09-10",
+    "start": "2026-09-10T02:30:00Z"
+  },
+  {
+    "changes": [
+      {
+        "path": "produzione/Registro lotti.txt",
+        "seed": "S07:lotti:2026-09-11",
+        "size": 3380
+      }
+    ],
+    "claimed_not_done": [
+      "backup_b"
+    ],
+    "export_seed": "S07:export:2026-09-11",
+    "run": "2026-09-11",
+    "start": "2026-09-11T02:30:00Z"
+  },
+  {
+    "changes": [
+      {
+        "path": "produzione/Registro lotti.txt",
+        "seed": "S07:lotti:2026-09-12",
+        "size": 3420
+      }
+    ],
+    "claimed_not_done": [
+      "backup_b"
+    ],
+    "export_seed": "S07:export:2026-09-12",
+    "run": "2026-09-12",
+    "start": "2026-09-12T02:30:00Z"
+  }
+]

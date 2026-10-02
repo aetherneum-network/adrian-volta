@@ -1,0 +1,16 @@
+{
+  "id": "S06",
+  "title": "One corrupt block in the primary repository",
+  "company": "Vetreria Altofonte S.r.l.",
+  "synthetic": true,
+  "negative": false,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "After three good nights, one byte of one block of the primary repository is flipped (input/damage.json says which). The registry still holds a successful drill of that snapshot.",
+  "pass_criterion": "Verdict FAILED, exit code 3, finding block_corrupt on repo_a and its newest snapshot; the damaged file is named and only that file; the fallback on the secondary repository is declared and verifies; the independent reference agrees on both repositories.",
+  "lesson": "A past successful drill says nothing about today; the drill restores again and the fallback is said out loud."
+}

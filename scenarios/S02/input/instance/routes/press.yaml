@@ -1,0 +1,20 @@
+service: press
+routers:
+  - name: press-main
+    entrypoint: public
+    host: press.serrabruna.example
+    path_prefix: /
+    backend: press-backend
+  - name: press-api
+    entrypoint: public
+    host: press.serrabruna.example
+    path_prefix: /api
+    backend: press-backend
+  - name: press-docs
+    entrypoint: public
+    host: press.serrabruna.example
+    path_prefix: /docs
+    backend: press-backend
+backends:
+  press-backend:
+    target: "press:5000"

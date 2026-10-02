@@ -1,0 +1,123 @@
+{
+  "version": "2026.09.30-2",
+  "kind": "health",
+  "note": "Decides per service on facts measured by the end-to-end probe over the probe window. Ordered, first match wins. No match means the service is healthy as seen from the route. 'beat_s' is the probe period on the virtual clock; the window is the last 'probe_window_beats' beats ending at as_of. v2: H-020 decides on 'silent_consecutive_failures' (failing beats at which the health check said healthy), so one restart inside a long silent failure no longer turns it into 'service_down'.",
+  "params": {
+    "beat_s": 60,
+    "probe_window_beats": 30,
+    "restart_window_s": 600
+  },
+  "rules": [
+    {
+      "id": "H-010",
+      "when": {
+        "restarts_in_window": {
+          "ge": 3
+        }
+      },
+      "then": {
+        "class": "restart_loop",
+        "file": "trace.jsonl"
+      },
+      "rationale": "Three or more restarts within ten minutes is a loop, whatever a single probe says at the instant it looks. On top because a looping process also produces intermittent probe failures, and the loop is the cause.",
+      "tests": [
+        {
+          "id": "H-010-a",
+          "input": {
+            "restarts_in_window": 3,
+            "probe_consecutive_failures": 0,
+            "silent_consecutive_failures": 0
+          },
+          "expect": {
+            "class": "restart_loop"
+          }
+        },
+        {
+          "id": "H-010-b",
+          "input": {
+            "restarts_in_window": 6,
+            "probe_consecutive_failures": 4,
+            "silent_consecutive_failures": 0
+          },
+          "expect": {
+            "class": "restart_loop"
+          }
+        }
+      ]
+    },
+    {
+      "id": "H-020",
+      "when": {
+        "silent_consecutive_failures": {
+          "ge": 2
+        }
+      },
+      "then": {
+        "class": "health_probes_process",
+        "file": "topology.yaml"
+      },
+      "rationale": "The route failed for two consecutive beats while the declared healthcheck said healthy at both: the check looks at the process, not at the route a user takes. Declared at the second such beat; one isolated failing beat is not a failure. Counted on the beats where the check said healthy, so a restart in the middle of a long silent failure does not hide it.",
+      "tests": [
+        {
+          "id": "H-020-a",
+          "input": {
+            "restarts_in_window": 0,
+            "probe_consecutive_failures": 2,
+            "silent_consecutive_failures": 2
+          },
+          "expect": {
+            "class": "health_probes_process"
+          }
+        },
+        {
+          "id": "H-020-b",
+          "input": {
+            "restarts_in_window": 2,
+            "probe_consecutive_failures": 30,
+            "silent_consecutive_failures": 11
+          },
+          "expect": {
+            "class": "health_probes_process"
+          }
+        }
+      ]
+    },
+    {
+      "id": "H-030",
+      "when": {
+        "probe_consecutive_failures": {
+          "ge": 2
+        }
+      },
+      "then": {
+        "class": "service_down",
+        "file": "trace.jsonl"
+      },
+      "rationale": "The route failed for two consecutive beats and the healthcheck did not stay healthy through two of them: the service is down and says so.",
+      "tests": [
+        {
+          "id": "H-030-a",
+          "input": {
+            "restarts_in_window": 0,
+            "probe_consecutive_failures": 5,
+            "silent_consecutive_failures": 0
+          },
+          "expect": {
+            "class": "service_down"
+          }
+        },
+        {
+          "id": "H-030-b",
+          "input": {
+            "restarts_in_window": 1,
+            "probe_consecutive_failures": 3,
+            "silent_consecutive_failures": 1
+          },
+          "expect": {
+            "class": "service_down"
+          }
+        }
+      ]
+    }
+  ]
+}

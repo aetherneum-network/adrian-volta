@@ -1,0 +1,9 @@
+{"kind":"proc","service":"orders","state":"up","t":"2026-09-14T00:00:00Z"}
+{"kind":"serve","map":{"/":200,"/healthz":200},"service":"orders","t":"2026-09-14T00:00:00Z"}
+{"kind":"proc","service":"catalog","state":"up","t":"2026-09-14T00:00:00Z"}
+{"kind":"serve","map":{"/":200,"/healthz":200},"service":"catalog","t":"2026-09-14T00:00:00Z"}
+{"kind":"proc","service":"status","state":"up","t":"2026-09-14T00:00:00Z"}
+{"kind":"serve","map":{"/":200,"/healthz":200},"service":"status","t":"2026-09-14T00:00:00Z"}
+{"kind":"proc","service":"console","state":"up","t":"2026-09-14T00:00:00Z"}
+{"kind":"serve","map":{"/":200,"/healthz":200},"service":"console","t":"2026-09-14T00:00:00Z"}
+{"kind":"serve","map":{"/healthz":200},"service":"status","t":"2026-09-14T06:41:30Z"}

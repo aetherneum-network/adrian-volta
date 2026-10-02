@@ -1,0 +1,10 @@
+service: status
+routers:
+  - name: status-main
+    entrypoint: public
+    host: status.valdora.example
+    path_prefix: /
+    backend: status-backend
+backends:
+  status-backend:
+    target: "status:9000"

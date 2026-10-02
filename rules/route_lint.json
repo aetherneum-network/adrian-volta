@@ -1,0 +1,94 @@
+{
+  "version": "2026.09.30-1",
+  "kind": "route_lint",
+  "note": "Three ordered sections. 'file_rules' decide on a route file, 'router_rules' on one router, 'service_rules' on one service of the topology. First match wins; the exception (a disabled router is not loaded) is on top. No match means the router is accepted. One finding is enough to refuse the whole table.",
+  "file_rules": [
+    {
+      "id": "RL-000",
+      "when": {"readable": false},
+      "then": {"class": "route_unreadable"},
+      "rationale": "A route file that cannot be parsed, or that uses a key outside the documented schema, may mean anything. The table is refused; the file is named.",
+      "tests": [
+        {"id": "RL-000-a", "input": {"readable": false}, "expect": {"class": "route_unreadable"}}
+      ]
+    }
+  ],
+  "router_rules": [
+    {
+      "id": "RL-010",
+      "when": {"enabled": false},
+      "then": {"class": null, "action": "skip"},
+      "rationale": "Exception on top: a router written with 'enabled: false' is kept in the file as a superseded rule and is not loaded, so it cannot hide or expose anything.",
+      "tests": [
+        {"id": "RL-010-a", "input": {"enabled": false, "duplicate": true, "target_exists": true}, "expect": {"action": "skip"}},
+        {"id": "RL-010-b", "input": {"enabled": false, "target_plane": "admin", "on_public_entrypoint": true}, "expect": {"action": "skip"}}
+      ]
+    },
+    {
+      "id": "RL-020",
+      "when": {"entrypoints_known": false},
+      "then": {"class": "route_unreadable"},
+      "rationale": "An entrypoint that the topology does not declare has no plane: the router cannot be placed, so it is refused.",
+      "tests": [
+        {"id": "RL-020-a", "input": {"enabled": true, "entrypoints_known": false}, "expect": {"class": "route_unreadable"}}
+      ]
+    },
+    {
+      "id": "RL-030",
+      "when": {"backend_defined": false},
+      "then": {"class": "route_missing_service"},
+      "rationale": "The router names a backend that its own file does not define: the route leads nowhere.",
+      "tests": [
+        {"id": "RL-030-a", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": false}, "expect": {"class": "route_missing_service"}}
+      ]
+    },
+    {
+      "id": "RL-040",
+      "when": {"target_exists": false},
+      "then": {"class": "route_missing_service"},
+      "rationale": "The backend targets a service that is not in the topology.",
+      "tests": [
+        {"id": "RL-040-a", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": true, "target_exists": false}, "expect": {"class": "route_missing_service"}}
+      ]
+    },
+    {
+      "id": "RL-050",
+      "when": {"target_plane": "admin", "on_public_entrypoint": true},
+      "then": {"class": "admin_on_public"},
+      "rationale": "A service of the admin plane must never be reachable from a public entrypoint. Placed before the port and duplicate rules: exposure is reported as exposure.",
+      "tests": [
+        {"id": "RL-050-a", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": true, "target_exists": true, "target_plane": "admin", "on_public_entrypoint": true, "duplicate": false}, "expect": {"class": "admin_on_public"}},
+        {"id": "RL-050-b", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": true, "target_exists": true, "target_plane": "admin", "on_public_entrypoint": true, "duplicate": true}, "expect": {"class": "admin_on_public"}}
+      ]
+    },
+    {
+      "id": "RL-060",
+      "when": {"port_matches": false},
+      "then": {"class": "route_wrong_port"},
+      "rationale": "The backend targets an existing service on a port the service does not listen on.",
+      "tests": [
+        {"id": "RL-060-a", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": true, "target_exists": true, "target_plane": "public", "on_public_entrypoint": true, "port_matches": false}, "expect": {"class": "route_wrong_port"}}
+      ]
+    },
+    {
+      "id": "RL-070",
+      "when": {"duplicate": true},
+      "then": {"class": "route_duplicate_shadow"},
+      "rationale": "Another enabled router has the same entrypoint, host and path prefix: one of the two never receives a request. Both files are cited.",
+      "tests": [
+        {"id": "RL-070-a", "input": {"enabled": true, "entrypoints_known": true, "backend_defined": true, "target_exists": true, "target_plane": "public", "on_public_entrypoint": true, "port_matches": true, "duplicate": true}, "expect": {"class": "route_duplicate_shadow"}}
+      ]
+    }
+  ],
+  "service_rules": [
+    {
+      "id": "RL-S10",
+      "when": {"plane": "admin", "on_public_network": true},
+      "then": {"class": "admin_on_public"},
+      "rationale": "An admin-plane service attached to a network of the public plane is exposed even without a route.",
+      "tests": [
+        {"id": "RL-S10-a", "input": {"plane": "admin", "on_public_network": true}, "expect": {"class": "admin_on_public"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "allowed_domains": [
+    "aetherneum.com",
+    "github.com",
+    "anthropic.com",
+    "pyyaml.org",
+    "yaml.org",
+    "python.org",
+    "opensource.org"
+  ],
+  "binary_files_not_scanned": [
+    "avatar.jpg"
+  ],
+  "declaration_signed_by": "[TO CONFIRM]",
+  "files_scanned": 218,
+  "findings": [],
+  "limits": "pattern scan only; it does not prove the absence of every possible leak",
+  "result": "clean",
+  "rules": [
+    "PATH-WIN",
+    "PATH-UNIX",
+    "SECRET-KEY",
+    "SECRET-TOKEN",
+    "SECRET-ASSIGN",
+    "DOMAIN",
+    "IPV4",
+    "NOT-UTF8"
+  ],
+  "scanner": "tools/scan.py",
+  "version": "1"
+}

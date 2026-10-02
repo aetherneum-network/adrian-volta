@@ -1,0 +1,30 @@
+{
+  "chained": {
+    "exit_code": 0,
+    "export_in_snapshot_sha256": "b6d504cdc4b485b05465bbdf8b570e91cef8eff61de44062f52158580d3c8905",
+    "verdict": "OK"
+  },
+  "export_today_sha256": "b6d504cdc4b485b05465bbdf8b570e91cef8eff61de44062f52158580d3c8905",
+  "export_yesterday_sha256": "76e03f98a9054cc282c0809917aa0d1587da9d3de2e06e6e36514e1ca6445d68",
+  "inverted": {
+    "drill_rule": "B-030",
+    "exit_code": 3,
+    "explained_by": "job_order_inverted",
+    "export_in_snapshot_sha256": "76e03f98a9054cc282c0809917aa0d1587da9d3de2e06e6e36514e1ca6445d68",
+    "findings": [
+      {
+        "also": [],
+        "class": "job_order_inverted",
+        "file": "policy/backup.yaml",
+        "item": "chain",
+        "rule": "C-010",
+        "verdict": "FAILED"
+      }
+    ],
+    "mismatched_files": [
+      "export/orders-export.csv"
+    ],
+    "verdict": "FAILED"
+  },
+  "scenario": "S08"
+}

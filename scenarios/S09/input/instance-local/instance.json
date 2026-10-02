@@ -1,0 +1,9 @@
+{
+  "as_of": "2026-10-25T05:40:00Z",
+  "company": "Vetreria Altofonte S.r.l.",
+  "instance_id": "S09-altofonte-host-off-dst-local",
+  "scope": [
+    "backup"
+  ],
+  "synthetic": true
+}

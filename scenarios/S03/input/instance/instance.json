@@ -1,0 +1,9 @@
+{
+  "as_of": "2026-09-16T06:00:00Z",
+  "company": "Vetreria Altofonte S.r.l.",
+  "instance_id": "S03-altofonte-admin-public-instance",
+  "scope": [
+    "routing"
+  ],
+  "synthetic": true
+}

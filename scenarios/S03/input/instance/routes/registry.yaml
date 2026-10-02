@@ -1,0 +1,12 @@
+service: registry
+routers:
+  - name: registry-main
+    entrypoints:
+      - admin
+      - public
+    host: registry.altofonte.example
+    path_prefix: /
+    backend: registry-backend
+backends:
+  registry-backend:
+    target: "registry:5000"

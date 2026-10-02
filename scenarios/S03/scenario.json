@@ -1,0 +1,16 @@
+{
+  "id": "S03",
+  "title": "An admin service must not become public",
+  "company": "Vetreria Altofonte S.r.l.",
+  "synthetic": true,
+  "negative": true,
+  "run": [
+    "python",
+    "check.py"
+  ],
+  "timeout_s": 120,
+  "expect_exit": 0,
+  "description": "Two ways to put an admin service on the public plane: a router that lists both entrypoints (routes/registry.yaml), and an admin service attached to the public network (topology.yaml).",
+  "pass_criterion": "Both are refused: verdict BLOCKED, exit code 2, the finding names the file and the item that draw the edge, the accepted table contains zero admin-public edges, and an independent reference computes the same edge on the table as loaded.",
+  "lesson": "The admin plane is a property of the table that is checked, not a convention that is remembered."
+}

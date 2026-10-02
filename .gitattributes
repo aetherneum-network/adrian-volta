@@ -1,0 +1,4 @@
+# Generated and hand-written text files keep LF on every operating system (byte-identical rebuilds).
+* text=auto eol=lf
+*.jpg binary
+*.bin binary

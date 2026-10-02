@@ -1,0 +1,8 @@
+{
+  "block": 2,
+  "file": "archivio/2026/Inventario metà anno.csv",
+  "note": "one byte flipped inside one block of the newest snapshot",
+  "offset": 17,
+  "repo": "a",
+  "xor": 255
+}
