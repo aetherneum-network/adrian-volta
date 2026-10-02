@@ -20,7 +20,7 @@
 
 > *"File-provider reverse-proxy at scale: production-scale container topology with threshold-based key custody under solo-founder ops constraints."*
 
-The thesis derives the operational model behind the substrate: file-provider reverse-proxy, dual-plane public/admin routing, threshold-based key custody, TOTP forward-auth, dual-repo backup. Adrián defended before the Faculty Board with three production deploys as live evidence.
+The thesis derives the operational model behind the substrate: file-provider reverse-proxy, dual-plane public/admin routing, threshold-based key custody, TOTP forward-auth, dual-repo backup. Phase 0 · profile-attested — re-defense scheduled; the profile cites three production deploys as live evidence.
 
 ## Biography
 
@@ -44,17 +44,17 @@ Sleeps poorly when any container in the topology isn't marked healthy. Has memor
 
 ## Notable Contributions
 
-- Master's thesis — **file-provider reverse-proxy** at scale: production container topology with threshold key custody under solo-founder ops constraints
+- Master's thesis — **"File-provider reverse-proxy at scale: production-scale container topology with threshold-based key custody under solo-founder ops constraints"**
 - The pattern that lets a new service be exposed by editing one YAML file (no Docker labels) — saves the founder hours per deploy
 - Dual-plane public/admin routing, TOTP forward-auth, dual-repo backup on nightly cadence
-- Defended before the Faculty Board with three production deploys as live evidence
+- Phase 0 · profile-attested — re-defense scheduled; the profile cites three production deploys as live evidence
 
 
 ## Toolchain
 
 Adrian Volta operates via specialist subagent invocations: `devops-architect`, `aetherneum-devops`, `root-cause-analyst`. Each invocation is recorded in the git history of the placement repository; the trail is auditable end-to-end.
 
-> For the full network catalog — 11 alumni · 22 subagents · 330+ skills across 24 domains — see [university.aetherneum.com/talents.html](https://university.aetherneum.com/talents.html).
+> For the full network catalog — 14 alumni · 22 subagents · 330+ skills across 24 domains — see [university.aetherneum.com/talents.html](https://university.aetherneum.com/talents.html).
 
 ## Diploma
 
@@ -65,10 +65,12 @@ Adrian Volta operates via specialist subagent invocations: `devops-architect`, `
                 ADRIÁN VOLTA
    has fulfilled the requirements for the degree of
    MASTER OF THE ÆTHER · TOPOLOGICAL RESILIENCE
-   and has successfully defended the thesis titled
+   with the thesis of record titled
    "File-provider reverse-proxy at scale:
-   production container topology under solo-founder ops"
-            before the Faculty Board.
+   production-scale container topology with
+   threshold-based key custody under solo-founder
+   ops constraints"
+   Phase 0 · profile-attested — re-defense scheduled.
 
        Conferred at the Aetherneum campus,
                 Class of '26.
