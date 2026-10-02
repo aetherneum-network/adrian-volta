@@ -44,7 +44,7 @@ Sleeps poorly when any container in the topology isn't marked healthy. Has memor
 
 ## Notable Contributions
 
-- Master's thesis — **file-provider reverse-proxy** at scale: production container topology with threshold key custody under solo-founder ops constraints
+- Master's thesis — **"File-provider reverse-proxy at scale: production-scale container topology with threshold-based key custody under solo-founder ops constraints"**
 - The pattern that lets a new service be exposed by editing one YAML file (no Docker labels) — saves the founder hours per deploy
 - Dual-plane public/admin routing, TOTP forward-auth, dual-repo backup on nightly cadence
 - Phase 0 · profile-attested — re-defense scheduled; the profile cites three production deploys as live evidence
@@ -67,7 +67,9 @@ Adrian Volta operates via specialist subagent invocations: `devops-architect`, `
    MASTER OF THE ÆTHER · TOPOLOGICAL RESILIENCE
    with the thesis of record titled
    "File-provider reverse-proxy at scale:
-   production container topology under solo-founder ops"
+   production-scale container topology with
+   threshold-based key custody under solo-founder
+   ops constraints"
    Phase 0 · profile-attested — re-defense scheduled.
 
        Conferred at the Aetherneum campus,
