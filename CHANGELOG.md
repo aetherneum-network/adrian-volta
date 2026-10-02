@@ -3,6 +3,22 @@
 Nothing is deleted or rewritten in this repository: a change is a new entry, a new version of a
 rule file, a new commit. Dates are UTC.
 
+## Unreleased - 2026-10-02 (main after pull requests #1 and #2, no freeze tag)
+
+Pull request #1 (week-1 review of 2026-09-30, merge commit `57da42b`) corrected the thesis title
+in two places of the profile text of the README. Pull request #2 (merge commit `8c4fb91`) brought in
+the pack, whose `MANIFEST.sha256` (commit `e16de79`) and profile hash in `tests/test_docs.py` had
+been computed on the README before that review. On `main`, `python tools/manifest.py --check`
+answered `differs: README.md` (run 37033155210, 2026-10-02, both systems) and the later steps did
+not run.
+
+- `tests/test_docs.py`: `PROFILE_SHA256` is the SHA-256 of the reviewed profile text, with a
+  comment that names pull request #1 as the source of the change. The pack did not change the text.
+- `MANIFEST.sha256`: written by `tools/manifest.py` in the next commit, which names the commit
+  before it.
+- Code, rules, corpus, scenarios, records and the README text are unchanged; the tags
+  `v2.0.0-freeze` to `v2.0.3-freeze` stay where they are.
+
 ## v2.0.3-freeze - 2026-10-02
 
 Fix of the manifest of `v2.0.2-freeze`. No other file changed except this entry and one line of

@@ -9,7 +9,8 @@ from tests import _util as U
 
 # SHA-256 of the profile text (README from its title to the end, LF line endings) as it was before the
 # proof pack was added. The pack adds a section above it and changes nothing below.
-PROFILE_SHA256 = "ea323613305424ab16c7cbf5be5f0fe113c1eec5ad63542f338838c77ca440b5"
+# The text changed in PR #1 (week-1 review, merge commit 57da42b on main), not in the pack: hash of the reviewed text.
+PROFILE_SHA256 = "733d82ee71b93cb14674eb26bcad49176e9c888ecaeb21e0ed068797f3ee077d"
 PROFILE_TITLE = "# Adrián Volta\n".encode("utf-8")
 DOCUMENTS = ("SYNTHETIC.md", "CLAIMS.md", "MODEL.md", "CHANGELOG.md", "eval/BLIND_PROTOCOL.md", "docs/FORMAT.md")
 PATH = re.compile(r"`((?:lab|corpus|eval|rules|scenarios|tests|tools|docs|reports|compose)/[A-Za-z0-9_./-]+)`")
