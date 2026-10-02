@@ -86,8 +86,8 @@ Every run, the bad first ones included, is in `eval/history.json`.
   GitHub-hosted runners. Run 37013132166 (commit `0a16a1e`) passed on `ubuntu-latest` and
   `windows-latest`, and both rebuilds gave the digest above. No other Linux system was measured.
 - The human signature on the content declaration (`reports/scan.json`): `[TO CONFIRM]`.
-- A blind run of `v2.0.2-freeze`: it changes documents only, so the code is the one measured by the
-  blind run of `v2.0.1-freeze` above.
+- A blind run of `v2.0.2-freeze` or `v2.0.3-freeze`: they change documents and the manifest only, so
+  the code is the one measured by the blind run of `v2.0.1-freeze` above.
 
 Details, limits and differences from the plan: `CLAIMS.md`, `SYNTHETIC.md`, `MODEL.md`,
 `CHANGELOG.md`, `docs/FORMAT.md`. Licence: MIT.

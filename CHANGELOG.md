@@ -3,6 +3,25 @@
 Nothing is deleted or rewritten in this repository: a change is a new entry, a new version of a
 rule file, a new commit. Dates are UTC.
 
+## v2.0.3-freeze - 2026-10-02
+
+Fix of the manifest of `v2.0.2-freeze`. No other file changed except this entry and one line of
+the README.
+
+- **What was wrong.** In `v2.0.2-freeze` (commit `e02b74f`), `MANIFEST.sha256` gives for
+  `.gitignore` and `LICENSE` the SHA-256 of copies with CRLF line endings, as they were on the disk
+  where the manifest was written, not of the files as the repository stores them (LF, as
+  `.gitattributes` requires). The two files themselves did not change. `python tools/manifest.py
+  --check` on a fresh clone answers `differs: .gitignore`, `differs: LICENSE`, and the three workflow
+  runs on that commit (37017212340, 37017215378, 37017218665, 2026-10-02) failed at that step on
+  `ubuntu-latest` and `windows-latest`, before the tests. The local check had answered OK because it
+  read the same CRLF copies.
+- **Fix.** The two files checked out again with LF; `MANIFEST.sha256` written by
+  `tools/manifest.py` in the next commit, which the tag `v2.0.3-freeze` points to, and checked on a
+  fresh clone before the push.
+- `v2.0.2-freeze` stays where it is, with its two wrong lines; its entry below is not rewritten.
+  Code, rules, tests and records are identical to `v2.0.1-freeze`, as in `v2.0.2-freeze`.
+
 ## v2.0.2-freeze - 2026-10-02
 
 Documentation only, after the publication and the recorded blind run. No file that decides a
