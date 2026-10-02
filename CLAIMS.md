@@ -43,7 +43,8 @@ and the counter `never_event_restore` of the scorer, which is judged by
 stress suites (2026-09-30). **1 in the blind run of `v2.0.0-freeze`** (2026-09-30, seed
 `20261011`, run by the evaluator): one hand-written instance whose secondary index was cut in
 half was audited OK with drill `ok` (finding T17). Fixed in `v2.0.1-freeze` (`CHANGELOG.md`); the
-fix has not been measured blind. The development and stress suites give 0 again on the fixed code;
+blind run of `v2.0.1-freeze` (2026-09-30, seed `20261012`, run by the evaluator) gave 0
+(`eval/history.json`). The development and stress suites give 0 again on the fixed code;
 the holdout suite was not run again. The second counter, `never_event_admin_public`, is judged by
 `corpus/reference_reach.py`: 0 on the same suites.
 
@@ -87,7 +88,9 @@ text and is not taken here.
    the same agent. Development and holdout figures are saturated and measure internal consistency
    on synthetic data. The blind run of `v2.0.0-freeze` (`eval/BLIND_PROTOCOL.md`) found one
    defect, T17: localised 342/343, verdict 249/250, `never_event_restore` 1, all three from one
-   instance. The blind run of `v2.0.1-freeze`, which carries the fix, has not been made.
+   instance. The blind run of `v2.0.1-freeze`, which carries the fix, was made on 2026-09-30 by
+   the evaluator (Claude Fable 5.1, not the builder), seed `20261012`: localised 347/347, verdict
+   250/250, never-events 0 and 0 (`eval/history.json`). It is one run on one seed.
 2. **No independent reference for four classes.** Missed window, mixed time zones, retention, and
    the policy-order variant of the inverted chain are checked against the fault plan only
    (`docs/FORMAT.md`, section 4).
@@ -98,8 +101,13 @@ text and is not taken here.
    compression, no concurrency, no remote transport. "Secondary" is a second folder.
 5. **The clock is virtual.** Nothing is scheduled for real: the audit is one chained command that
    replays a trace up to `as_of` and declares what it could not evaluate.
-6. **One platform measured.** Windows x86-64, Python 3.12.10. The CI workflow targets Linux and
-   Windows and has never been executed; the rebuild digest on Linux is `[TO CONFIRM]`.
+6. **One platform measured by the author; Linux by the CI only.** The author measured on Windows
+   x86-64, Python 3.12.10. Published on 2026-10-02 as pull request #2, the CI workflow runs on
+   GitHub-hosted runners. Run 37013132166 (push, commit `0a16a1e`, 2026-10-02) passed on
+   `ubuntu-latest` (ubuntu-24.04, CPython 3.12.14) and `windows-latest` (Windows Server 2025, CPython
+   3.12.10); on both, the two rebuilds gave the digest recorded in `reports/REBUILD.sha256`,
+   `7454103ed44ca25212954c0ca1596a9f31455456489b8a68f5ef59409ea39a3b` (10376 files), printed in the
+   job logs. That is one Linux runner image, not Linux in general.
 7. **Lockfile.** `requirements.txt` carries the hashes of two wheels (CPython 3.12, Windows and
    Linux x86-64). Other platforms need their own. Action pins by commit SHA and the image digest
    are `[TO CONFIRM]`.

@@ -82,9 +82,12 @@ Every run, the bad first ones included, is in `eval/history.json`.
   repository.
 - Threshold key custody, TOTP forward-auth, the VPN admin plane, DNS-01 wildcard certificates and
   the observability products named in the profile: out of v2.0.
-- Linux: the CI workflow is written for Linux and Windows and has not been executed.
-- The blind run of `v2.0.1-freeze`, and the human signature on the content declaration
-  (`reports/scan.json`): `[TO CONFIRM]`.
+- Linux beyond one CI runner: published on 2026-10-02 as pull request #2, the workflow runs on
+  GitHub-hosted runners. Run 37013132166 (commit `0a16a1e`) passed on `ubuntu-latest` and
+  `windows-latest`, and both rebuilds gave the digest above. No other Linux system was measured.
+- The human signature on the content declaration (`reports/scan.json`): `[TO CONFIRM]`.
+- A blind run of `v2.0.2-freeze`: it changes documents only, so the code is the one measured by the
+  blind run of `v2.0.1-freeze` above.
 
 Details, limits and differences from the plan: `CLAIMS.md`, `SYNTHETIC.md`, `MODEL.md`,
 `CHANGELOG.md`, `docs/FORMAT.md`. Licence: MIT.

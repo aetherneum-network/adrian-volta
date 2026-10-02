@@ -3,6 +3,36 @@
 Nothing is deleted or rewritten in this repository: a change is a new entry, a new version of a
 rule file, a new commit. Dates are UTC.
 
+## v2.0.2-freeze - 2026-10-02
+
+Documentation only, after the publication and the recorded blind run. No file that decides a
+result changed: `lab/`, `rules/`, `corpus/`, `scenarios/`, `tests/`, `tools/`, `compose/`,
+`eval/score.py` and `requirements.txt` are identical to `v2.0.1-freeze`, which stays where it is;
+the blind run of `v2.0.1-freeze` measured the same code. `eval/history.json` and
+`eval/results.json` are unchanged. In the workflow file only a comment changed. Written through
+Claude Opus 5.5.
+
+- **Publication and CI.** The branch was published on 2026-10-02 as pull request #2 of this
+  repository and the workflow runs on GitHub-hosted runners. Run 37013132166 (push, commit
+  `0a16a1e`, 2026-10-02) passed on `ubuntu-latest` (ubuntu-24.04, CPython 3.12.14) and
+  `windows-latest` (Windows Server 2025, CPython 3.12.10): 307 tests OK, scenarios 10/10 PASS, scan
+  clean, and on both systems the two rebuilds gave the digest of `reports/REBUILD.sha256`
+  (`7454103ed44ca25212954c0ca1596a9f31455456489b8a68f5ef59409ea39a3b`, 10376 files). The
+  statements written before that, that the workflow had never been executed and that nothing was
+  pushed, now say so: the comment of `.github/workflows/ci.yml`, `CLAIMS.md` known limit 6 (the
+  Linux digest was `[TO CONFIRM]`) and the last section of the README proof-pack section. The line
+  "Linux: the CI workflow was written, never executed. Nothing was pushed." of the entry
+  `v2.0.1-freeze` described that version and stays as written.
+- **Blind run of `v2.0.1-freeze`.** The README table already carried its row (commit "Blind run:
+  seed 20261012"); `CLAIMS.md` (section 1 and known limit 1) and the last section of the README
+  still said that it had not been made. They now state what `eval/history.json` records: 2026-09-30,
+  the evaluator (Claude Fable 5.1, not the builder), seed `20261012`, localised 347/347, verdict
+  250/250, never-events 0 and 0.
+- `MANIFEST.sha256`: written by `tools/manifest.py` in the next commit, which the tag
+  `v2.0.2-freeze` points to.
+- Still `[TO CONFIRM]`: action pins by commit SHA, runner image digests, the human signature on the
+  content declaration.
+
 ## v2.0.1-freeze - 2026-09-30
 
 Fix of finding **T17**. Source: the evaluator's blind run of 2026-09-30 on `v2.0.0-freeze` (seed

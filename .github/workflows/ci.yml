@@ -3,8 +3,11 @@
 # the socket constructors and fail if anything tries. No secret is read, no container is started,
 # no model or API is called.
 #
-# Status: this workflow has been written, not executed (nothing has been pushed from the branch
-# it was written on). The first run on a Linux runner is the first time the pack runs on Linux.
+# Status: published on 2026-10-02 as pull request #2 of this repository; the workflow runs on
+# GitHub-hosted runners and its results are on the pull request. Run 37013132166 (push, commit
+# 0a16a1e, 2026-10-02) passed on ubuntu-latest (ubuntu-24.04, CPython 3.12.14) and windows-latest
+# (Windows Server 2025, CPython 3.12.10): 307 tests OK, scenarios 10/10 PASS, scan clean, and both
+# rebuilds equal to reports/REBUILD.sha256 on both systems.
 # Pins still to be made by the maintainers: action versions by commit SHA [TO CONFIRM], and the
 # digest of the runner image [TO CONFIRM]. They are not guessed here.
 name: ci
